@@ -22,14 +22,13 @@
 <section id="section-intro">
 <h1 id="about-pyarmnn">About PyArmNN</h1>
 <p>PyArmNN is a python extension for <a href="https://developer.arm.com/ip-products/processors/machine-learning/arm-nn">Arm NN SDK</a>.
-PyArmNN provides interface similar to Arm NN C++ Api.
-Before you proceed with the project setup, you will need to checkout and build a corresponding Arm NN version.</p>
+PyArmNN provides interface similar to Arm NN C++ Api.</p>
 <p>PyArmNN is built around public headers from the armnn/include folder of Arm NN. PyArmNN does not implement any computation kernels itself, all operations are
-delegated to the Arm NN library. </p>
+delegated to the Arm NN library.</p>
 <p>The following diagram shows the conceptual architecture of this library:
-<img alt="PyArmNN" src="../images/pyarmnn.png"></p>
+<img alt="PyArmNN" src="./images/pyarmnn.png"></p>
+<p>PyArmNN is currently distributed as a whl package (or also called a binary package), it is based on a development branch from <a href="https://review.mlplatform.org/admin/repos/ml/armnn,">https://review.mlplatform.org/admin/repos/ml/armnn,</a> where you can also find the latest source codes.</p>
 <h1 id="pyarmnn-installation">PyArmNN installation</h1>
-<p>PyArmNN is currently distributed only as a whl package (or also called binary package).</p>
 <p>Binary package is platform dependent and the name of the package will indicate the platform it was built for. It also depends on the version of Python, e.g.:</p>
 <ul>
 <li>Arm NN 19.08 package for Python3.7/Linux Aarch 64 bit machine: pyarmnn-19.8.0-cp37-cp37m-linux_aarch64.whl</li>

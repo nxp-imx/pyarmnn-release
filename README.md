@@ -2,17 +2,16 @@
 
 PyArmNN is a python extension for [Arm NN SDK](https://developer.arm.com/ip-products/processors/machine-learning/arm-nn).
 PyArmNN provides interface similar to Arm NN C++ Api.
-Before you proceed with the project setup, you will need to checkout and build a corresponding Arm NN version.
 
 PyArmNN is built around public headers from the armnn/include folder of Arm NN. PyArmNN does not implement any computation kernels itself, all operations are
-delegated to the Arm NN library. 
+delegated to the Arm NN library.
 
 The following diagram shows the conceptual architecture of this library:
-![PyArmNN](./images/pyarmnn.png)
+![PyArmNN](./docs/images/pyarmnn.png)
+
+PyArmNN is currently distributed as a whl package (or also called a binary package), it is based on a development branch from https://review.mlplatform.org/admin/repos/ml/armnn, where you can also find the latest source codes.
 
 # PyArmNN installation
-
-PyArmNN is currently distributed only as a whl package (or also called binary package).
 
 Binary package is platform dependent and the name of the package will indicate the platform it was built for. It also depends on the version of Python, e.g.:
 
