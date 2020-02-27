@@ -88,9 +88,21 @@ print(results)
 For a more complete Arm NN experience, there is a couple of examples located in the examples folder, which require requests, PIL and maybe some other python modules. You may install those using pip.
 
 To run these examples you may simply execute them using the python interpreter. There are no arguments and the resources are downloaded by the scripts:
-
 ```bash
-$ python3 /path/to/examples/tflite_mobilenetv1_quantized.py
+$ python3 tflite_mobilenetv1_quantized.py
 ```
 
-*example_utils.py* is a file containg common functions for the rest of the scripts and ot does not execute anything on its own. The rest of the scripts are the examples.
+The output should look similar to the following:
+```
+Downloading 'mobilenet_v1_1.0_224_quant_and_labels.zip' from 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/mobilenet_v1_1.0_224_quant_and_labels.zip' ...
+Finished.
+Downloading 'kitten.jpg' from 'https://s3.amazonaws.com/model-server/inputs/kitten.jpg' ...
+Finished.
+Running inference on 'kitten.jpg' ...
+class=tabby ; value=99
+class=Egyptian cat ; value=84
+class=tiger cat ; value=71
+class=cricket ; value=0
+class=zebra ; value=0
+```
+*example_utils.py* is a file containg common functions for the rest of the scripts and it does not execute anything on its own.

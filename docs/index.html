@@ -86,9 +86,21 @@ print(results)
 <h4 id="running-examples">Running examples</h4>
 <p>For a more complete Arm NN experience, there is a couple of examples located in the examples folder, which require requests, PIL and maybe some other python modules. You may install those using pip.</p>
 <p>To run these examples you may simply execute them using the python interpreter. There are no arguments and the resources are downloaded by the scripts:</p>
-<pre><code class="bash">$ python3 /path/to/examples/tflite_mobilenetv1_quantized.py
+<pre><code class="bash">$ python3 tflite_mobilenetv1_quantized.py
 </code></pre>
-<p><em>example_utils.py</em> is a file containg common functions for the rest of the scripts and ot does not execute anything on its own. The rest of the scripts are the examples.</p>
+<p>The output should look similar to the following:</p>
+<pre><code>Downloading 'mobilenet_v1_1.0_224_quant_and_labels.zip' from 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/mobilenet_v1_1.0_224_quant_and_labels.zip' ...
+Finished.
+Downloading 'kitten.jpg' from 'https://s3.amazonaws.com/model-server/inputs/kitten.jpg' ...
+Finished.
+Running inference on 'kitten.jpg' ...
+class=tabby ; value=99
+class=Egyptian cat ; value=84
+class=tiger cat ; value=71
+class=cricket ; value=0
+class=zebra ; value=0
+</code></pre>
+<p><em>example_utils.py</em> is a file containg common functions for the rest of the scripts and it does not execute anything on its own.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
