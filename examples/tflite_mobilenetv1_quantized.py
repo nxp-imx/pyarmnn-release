@@ -1,14 +1,14 @@
 # Copyright 2020 NXP
 # SPDX-License-Identifier: MIT
 
-import pyarmnn as ann
-import numpy as np
-import example_utils as eu
 from zipfile import ZipFile
+import numpy as np
+import pyarmnn as ann
+import example_utils as eu
 
 archive_filename = eu.download_file('https://storage.googleapis.com/download.tensorflow.org/models/tflite/mobilenet_v1_1.0_224_quant_and_labels.zip')
 with ZipFile(archive_filename, 'r') as zip_obj:
-   zip_obj.extractall()
+    zip_obj.extractall()
 labels_filename = 'labels_mobilenet_quant_v1_224.txt'
 model_filename = 'mobilenet_v1_1.0_224_quant.tflite'
 image_filename = eu.download_file('https://s3.amazonaws.com/model-server/inputs/kitten.jpg')
@@ -34,8 +34,8 @@ output_tensors = [(output_tensor_id, ann.Tensor(output_tensor_info))]
 labels = eu.load_labels(labels_filename)
 
 # Load images and resize to expected size
-image_names = [ image_filename ]
-images = eu.load_images(image_names , input_width, input_height)
+image_names = [image_filename]
+images = eu.load_images(image_names, input_width, input_height)
 
 for idx, im in enumerate(images):
     # Create input tensors
@@ -44,7 +44,6 @@ for idx, im in enumerate(images):
     # Run inference
     print("Running inference on '{0}' ...".format(image_names[idx]))
     runtime.EnqueueWorkload(net_id, input_tensors, output_tensors)
-    
     # Process output
     out_tensor = output_tensors[0][1].get_memory_area()
     results = np.argsort(out_tensor)[::-1]

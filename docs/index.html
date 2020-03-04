@@ -54,7 +54,7 @@ parser = ann.ITfLiteParser()
 network = parser.CreateNetworkFromBinaryFile('./model.tflite')
 </code></pre>
 <p>Get the input binding information by using the name of the input layer.</p>
-<pre><code class="python">input_binding_info = parser.GetNetworkInputBindingInfo(0, 'model/input')
+<pre><code class="python">input_binding_info = parser.GetNetworkInputBindingInfo(0, 'input_layer_name')
 
 # Create a runtime object that will perform inference.
 options = ann.CreationOptions()
@@ -70,11 +70,12 @@ net_id, _ = runtime.LoadNetwork(opt_network)
 </code></pre>
 <p>Make workload tensors using input and output binding information.</p>
 <pre><code class="python"># Load an image and create an inputTensor for inference.
+# img must have the same size as the input layer; PIL or skimage might be used for resizing if img has a different size
 img = imageio.imread('./image.png')
 input_tensors = ann.make_input_tensors([input_binding_info], [img])
 
 # Get output binding information for an output layer by using the layer name.
-output_binding_info = parser.GetNetworkOutputBindingInfo(0, 'model/output')
+output_binding_info = parser.GetNetworkOutputBindingInfo(0, 'output_layer_name')
 output_tensors = ann.make_output_tensors([outputs_binding_info])
 </code></pre>
 <p>Perform inference and get the results back into a numpy array.</p>
@@ -84,8 +85,8 @@ results = ann.workload_tensors_to_ndarray(output_tensors)
 print(results)
 </code></pre>
 <h4 id="running-examples">Running examples</h4>
-<p>For a more complete Arm NN experience, there is a couple of examples located in the examples folder, which require requests, PIL and maybe some other python modules. You may install those using pip.</p>
-<p>To run these examples you may simply execute them using the python interpreter. There are no arguments and the resources are downloaded by the scripts:</p>
+<p>For a more complete Arm NN experience, there is a couple of examples located in the examples folder, which require requests, PIL and maybe some other Python3 modules depending on your image. You may install the missing modules using pip3.</p>
+<p>To run these examples you may simply execute them using the Python3 interpreter. There are no arguments and the resources are downloaded by the scripts:</p>
 <pre><code class="bash">$ python3 tflite_mobilenetv1_quantized.py
 </code></pre>
 <p>The output should look similar to the following:</p>

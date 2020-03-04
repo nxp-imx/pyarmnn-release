@@ -3,10 +3,11 @@
 
 import pyarmnn as ann
 import numpy as np
-import example_utils as eu
 from PIL import Image
+import example_utils as eu
 
-def preprocess_onnx(img: Image, width: int, height: int, data_type, scale: float, mean: list, stddev: list):
+def preprocess_onnx(img: Image, width: int, height: int, data_type, scale: float, mean: list,
+                    stddev: list):
     """Preprocessing function for ONNX imagenet models based on:
     https://github.com/onnx/models/blob/master/vision/classification/imagenet_inference.ipynb
 
@@ -31,7 +32,7 @@ def preprocess_onnx(img: Image, width: int, height: int, data_type, scale: float
     img = img.crop((left, top, right, bottom))
     img = img.convert('RGB')
     img = np.array(img)
-    img = np.reshape(img, (-1,3)) # reshape to [RGB][RGB]...
+    img = np.reshape(img, (-1, 3)) # reshape to [RGB][RGB]...
     img = ((img / scale) - mean) / stddev
     # NHWC to NCHW conversion, by default NHWC is expected
     # image is loaded as [RGB][RGB][RGB]... transposing it makes it [RRR...][GGG...][BBB...]
@@ -58,15 +59,14 @@ output_tensors = [(output_tensor_id, ann.Tensor(output_tensor_info))]
 labels = eu.load_labels(labels_filename)
 
 # Load images and resize to expected size
-image_names = [ kitten_filename ]
-images = eu.load_images( image_names,
-                    224,
-                    224,
-                    np.float32,
-                    255.0,
-                    [ 0.485, 0.456, 0.406 ],
-                    [ 0.229, 0.224, 0.225 ],
-                    preprocess_onnx)
+image_names = [kitten_filename]
+images = eu.load_images(image_names,
+                        224, 224,
+                        np.float32,
+                        255.0,
+                        [0.485, 0.456, 0.406],
+                        [0.229, 0.224, 0.225],
+                        preprocess_onnx)
 
 for idx, im in enumerate(images):
     # Create input tensors
@@ -75,7 +75,6 @@ for idx, im in enumerate(images):
     # Run inference
     print("Running inference on '{0}' ...".format(image_names[idx]))
     runtime.EnqueueWorkload(net_id, input_tensors, output_tensors)
-    
     # Process output
     out_tensor = output_tensors[0][1].get_memory_area()
     results = np.argsort(out_tensor)[::-1]

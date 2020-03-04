@@ -49,7 +49,7 @@ network = parser.CreateNetworkFromBinaryFile('./model.tflite')
 
 Get the input binding information by using the name of the input layer.
 ```python
-input_binding_info = parser.GetNetworkInputBindingInfo(0, 'model/input')
+input_binding_info = parser.GetNetworkInputBindingInfo(0, 'input_layer_name')
 
 # Create a runtime object that will perform inference.
 options = ann.CreationOptions()
@@ -67,11 +67,12 @@ net_id, _ = runtime.LoadNetwork(opt_network)
 Make workload tensors using input and output binding information.
 ```python
 # Load an image and create an inputTensor for inference.
+# img must have the same size as the input layer; PIL or skimage might be used for resizing if img has a different size
 img = imageio.imread('./image.png')
 input_tensors = ann.make_input_tensors([input_binding_info], [img])
 
 # Get output binding information for an output layer by using the layer name.
-output_binding_info = parser.GetNetworkOutputBindingInfo(0, 'model/output')
+output_binding_info = parser.GetNetworkOutputBindingInfo(0, 'output_layer_name')
 output_tensors = ann.make_output_tensors([outputs_binding_info])
 ```
 
@@ -85,9 +86,9 @@ print(results)
 
 #### Running examples
 
-For a more complete Arm NN experience, there is a couple of examples located in the examples folder, which require requests, PIL and maybe some other python modules. You may install those using pip.
+For a more complete Arm NN experience, there is a couple of examples located in the examples folder, which require requests, PIL and maybe some other Python3 modules depending on your image. You may install the missing modules using pip3.
 
-To run these examples you may simply execute them using the python interpreter. There are no arguments and the resources are downloaded by the scripts:
+To run these examples you may simply execute them using the Python3 interpreter. There are no arguments and the resources are downloaded by the scripts:
 ```bash
 $ python3 tflite_mobilenetv1_quantized.py
 ```

@@ -1,12 +1,12 @@
 # Copyright 2020 NXP
 # SPDX-License-Identifier: MIT
 
+from urllib.parse import urlparse
+import os
 from PIL import Image
 import pyarmnn as ann
 import numpy as np
-import os
 import requests
-from urllib.parse import urlparse
 
 
 def create_tflite_network(model_file: str, backends: list = ['CpuAcc', 'CpuRef']):
@@ -32,7 +32,8 @@ def create_tflite_network(model_file: str, backends: list = ['CpuAcc', 'CpuRef']
     for b in backends:
         preferred_backends.append(ann.BackendId(b))
 
-    opt_network, _ = ann.Optimize(network, preferred_backends, runtime.GetDeviceSpec(), ann.OptimizerOptions())
+    opt_network, _ = ann.Optimize(network, preferred_backends, runtime.GetDeviceSpec(),
+                                  ann.OptimizerOptions())
     net_id, _ = runtime.LoadNetwork(opt_network)
     graph_id = parser.GetSubgraphCount() - 1
 
@@ -61,13 +62,15 @@ def create_onnx_network(model_file: str, backends: list = ['CpuAcc', 'CpuRef']):
     for b in backends:
         preferred_backends.append(ann.BackendId(b))
 
-    opt_network, _ = ann.Optimize(network, preferred_backends, runtime.GetDeviceSpec(), ann.OptimizerOptions())
+    opt_network, _ = ann.Optimize(network, preferred_backends, runtime.GetDeviceSpec(),
+                                  ann.OptimizerOptions())
     net_id, _ = runtime.LoadNetwork(opt_network)
 
     return net_id, parser, runtime
 
 
-def preprocess_default(img: Image, width: int, height: int, data_type, scale: float, mean: list, stddev: list):
+def preprocess_default(img: Image, width: int, height: int, data_type, scale: float, mean: list,
+                       stddev: list):
     """Default preprocessing image function.
 
     Args:
@@ -85,14 +88,15 @@ def preprocess_default(img: Image, width: int, height: int, data_type, scale: fl
     img = img.resize((width, height), Image.BILINEAR)
     img = img.convert('RGB')
     img = np.array(img)
-    img = np.reshape(img, (-1,3)) # reshape to [RGB][RGB]...
+    img = np.reshape(img, (-1, 3)) # reshape to [RGB][RGB]...
     img = ((img / scale) - mean) / stddev
     img = img.flatten().astype(data_type)
     return img
 
 
 def load_images(image_files: list, input_width: int, input_height: int, data_type=np.uint8,
-                scale: float = 1., mean: list = [0., 0., 0.], stddev: list = [1., 1., 1.], preprocess_fn = preprocess_default):
+                scale: float = 1., mean: list = [0., 0., 0.], stddev: list = [1., 1., 1.],
+                preprocess_fn=preprocess_default):
     """Loads images, resizes and performs any additional preprocessing to run inference.
 
     Args:
@@ -126,7 +130,7 @@ def load_labels(label_file: str):
         list: List of labels read from a file.
     """
     with open(label_file, 'r') as f:
-        labels = [ l.rstrip() for l in f ]
+        labels = [l.rstrip() for l in f]
         return labels
     return None
 
@@ -148,7 +152,7 @@ def print_top_n(N: int, results: list, labels: list, prob: list):
         print("class={0} ; value={1}".format(labels[results[i]], prob[results[i]]))
 
 
-def download_file(url: str, force: bool=False, filename: str=None):
+def download_file(url: str, force: bool = False, filename: str = None):
     """Downloads a file.
 
     Args:
