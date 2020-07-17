@@ -1,0 +1,4 @@
+.idea/
+build/
+python/pyarmnn/pyarmnn_docs-*
+python/pyarmnn/test/testdata/
