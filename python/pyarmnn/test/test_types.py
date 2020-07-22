@@ -1,7 +1,8 @@
-# Copyright © 2019 Arm Ltd. All rights reserved.
+# Copyright © 2020 Arm Ltd. All rights reserved.
 # SPDX-License-Identifier: MIT
 import pytest
 import pyarmnn as ann
+
 
 def test_activation_function():
     assert 0 == ann.ActivationFunction_Sigmoid
@@ -14,6 +15,7 @@ def test_activation_function():
     assert 7 == ann.ActivationFunction_Abs
     assert 8 == ann.ActivationFunction_Sqrt
     assert 9 == ann.ActivationFunction_Square
+
 
 def test_permutation_vector():
     pv = ann.PermutationVector((0, 2, 3, 1))

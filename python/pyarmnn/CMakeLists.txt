@@ -2,43 +2,52 @@
 # Copyright 2020 NXP
 # SPDX-License-Identifier: MIT
 #
+set(SETUP_PY_IN         "${CMAKE_CURRENT_SOURCE_DIR}/setup.py")
+set(SETUP_PY            "${CMAKE_CURRENT_BINARY_DIR}/setup.py")
+set(SWIG_GENERATE_IN    "${CMAKE_CURRENT_SOURCE_DIR}/swig_generate.py")
+set(SWIG_GENERATE       "${CMAKE_CURRENT_BINARY_DIR}/swig_generate.py")
+set(OUT_WRAP            "${CMAKE_CURRENT_BINARY_DIR}/pyarmnn.wrap.timestamp")
 
-if(PYTHON_DEVENV_ENABLED)
-    set(SETUP_PY_IN         "${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in")
-    set(SETUP_PY            "${CMAKE_CURRENT_BINARY_DIR}/setup.py")
-    set(SWIG_GENERATE_IN    "${CMAKE_CURRENT_SOURCE_DIR}/swig_generate.py.in")
-    set(SWIG_GENERATE       "${CMAKE_CURRENT_BINARY_DIR}/swig_generate.py")
-    set(DEPS                "${CMAKE_CURRENT_SOURCE_DIR}/src/pyarmnn/__init__.py"
-                            "${CMAKE_CURRENT_SOURCE_DIR}/src/pyarmnn/_version.py")
-    set(OUT_WRAPPERS        "${CMAKE_CURRENT_BINARY_DIR}/pyarmnn.wrappers.timestamp")
+configure_file(${SETUP_PY_IN} ${SETUP_PY} COPYONLY)
+configure_file(${SWIG_GENERATE_IN} ${SWIG_GENERATE} COPYONLY)
 
-    configure_file(${SETUP_PY_IN} ${SETUP_PY})    
-    configure_file(${SWIG_GENERATE_IN} ${SWIG_GENERATE})
+# local env variables passed down to the python scripts
+# scripts can thus be used standalone
+set(ARMNN_ENV ARMNN_INCLUDE=${ARMNN_INCLUDE}
+              ARMNN_LIB=${ARMNN_LIB}
+              SWIG_EXECUTABLE=${SWIG_EXECUTABLE})
 
-    add_custom_command(OUTPUT ${OUT_WRAPPERS}
-                       COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/README.md ${CMAKE_CURRENT_BINARY_DIR}
-                       COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/licences.txt ${CMAKE_CURRENT_BINARY_DIR}
-                       COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR}/src
-                       COMMAND ${Python3_EXECUTABLE} ${SETUP_PY} clean --all
-                       COMMAND ${Python3_EXECUTABLE} ${SWIG_GENERATE}
-                       COMMAND ${Python3_EXECUTABLE} ${SETUP_PY} build_ext
-                       COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/src/pyarmnn/_generated ${CMAKE_CURRENT_BINARY_DIR}/src/pyarmnn/_generated
-                       COMMAND ${CMAKE_COMMAND} -E touch ${OUT_WRAPPERS}
-                       DEPENDS ${DEPS})
+# common step - generates swig wrappers and builds the lib
+add_custom_command(OUTPUT ${OUT_WRAP}
+                   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/README.md ${CMAKE_CURRENT_BINARY_DIR}
+                   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/LICENSE ${CMAKE_CURRENT_BINARY_DIR}
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR}/src
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/test ${CMAKE_CURRENT_BINARY_DIR}/test
+                   COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --green "Clearing Python build ..."
+                   COMMAND ${Python3_EXECUTABLE} ${SETUP_PY} --quiet clean --all
+                   COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --green "Generating SWIG wrappers ..."
+                   COMMAND ${CMAKE_COMMAND} -E env ${ARMNN_ENV} ${Python3_EXECUTABLE} ${SWIG_GENERATE} -v
+                   COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --green "Building Python extensions ..."
+                   COMMAND ${CMAKE_COMMAND} -E env ${ARMNN_ENV} ${Python3_EXECUTABLE} ${SETUP_PY} --quiet build_ext --inplace
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/src/pyarmnn/_generated ${CMAKE_CURRENT_BINARY_DIR}/src/pyarmnn/_generated
+                   COMMAND ${CMAKE_COMMAND} -E touch ${OUT_WRAP})
 
-    if(BUILD_PYTHON_SRC_PACKAGE)
-        set(OUT_SRC "${CMAKE_CURRENT_BINARY_DIR}/pyarmnn.src.timestamp")
-        add_custom_command(OUTPUT  ${OUT_SRC}
-                           COMMAND ${Python3_EXECUTABLE} ${SETUP_PY} sdist
-                           COMMAND ${CMAKE_COMMAND} -E touch ${OUT_SRC}
-                           DEPENDS ${DEPS} ${OUT_WRAPPERS})
-    endif()
-    if(BUILD_PYTHON_WHL_PACKAGE)
-        set(OUT_WHL "${CMAKE_CURRENT_BINARY_DIR}/pyarmnn.whl.timestamp")
-        add_custom_command(OUTPUT  ${OUT_WHL}
-                           COMMAND ${Python3_EXECUTABLE} ${SETUP_PY} bdist_wheel
-                           COMMAND ${CMAKE_COMMAND} -E touch ${OUT_WHL}
-                           DEPENDS ${DEPS} ${OUT_WRAPPERS})
-    endif()
-    add_custom_target(pyarmnn ALL DEPENDS ${OUT_WRAPPERS} ${OUT_SRC} ${OUT_WHL})
+# source package
+if(BUILD_PYTHON_SRC)
+    set(OUT_SRC "${CMAKE_CURRENT_BINARY_DIR}/pyarmnn.src.timestamp")
+    add_custom_command(OUTPUT  ${OUT_SRC}
+                       COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --green "Building Python source package ..."
+                       COMMAND ${CMAKE_COMMAND} -E env ${ARMNN_ENV} ${Python3_EXECUTABLE} ${SETUP_PY} --quiet sdist
+                       COMMAND ${CMAKE_COMMAND} -E touch ${OUT_SRC}
+                       DEPENDS ${OUT_WRAP})
 endif()
+# wheel package
+if(BUILD_PYTHON_WHL)
+    set(OUT_WHL "${CMAKE_CURRENT_BINARY_DIR}/pyarmnn.whl.timestamp")
+    add_custom_command(OUTPUT  ${OUT_WHL}
+                       COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --green "Building Python binary package ..."
+                       COMMAND ${CMAKE_COMMAND} -E env ${ARMNN_ENV} ${Python3_EXECUTABLE} ${SETUP_PY} --quiet bdist_wheel
+                       COMMAND ${CMAKE_COMMAND} -E touch ${OUT_WHL}
+                       DEPENDS ${OUT_WRAP})
+endif()
+add_custom_target(pyarmnn ALL DEPENDS ${OUT_WRAP} ${OUT_SRC} ${OUT_WHL})

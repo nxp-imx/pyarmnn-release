@@ -1,4 +1,4 @@
-# Copyright © 2019 Arm Ltd. All rights reserved.
+# Copyright © 2020 Arm Ltd. All rights reserved.
 # Copyright 2020 NXP
 # SPDX-License-Identifier: MIT
 import os
@@ -13,9 +13,10 @@ import platform
 @pytest.fixture(scope="function")
 def random_runtime(shared_data_folder):
     parser = ann.ITfLiteParser()
-    network = parser.CreateNetworkFromBinaryFile(os.path.join(shared_data_folder, 'ssd_mobilenetv1.tflite'))
+    network = parser.CreateNetworkFromBinaryFile(os.path.join(shared_data_folder, 'mock_model.tflite'))
     preferred_backends = [ann.BackendId('CpuRef')]
     options = ann.CreationOptions()
+
     runtime = ann.IRuntime(options)
 
     graphs_count = parser.GetSubgraphCount()
@@ -51,14 +52,14 @@ def random_runtime(shared_data_folder):
 
 
 @pytest.fixture(scope='function')
-def mobilenet_ssd_runtime(shared_data_folder):
+def mock_model_runtime(shared_data_folder):
     parser = ann.ITfLiteParser()
-    network = parser.CreateNetworkFromBinaryFile(os.path.join(shared_data_folder, 'ssd_mobilenetv1.tflite'))
+    network = parser.CreateNetworkFromBinaryFile(os.path.join(shared_data_folder, 'mock_model.tflite'))
     graph_id = 0
 
-    input_binding_info = parser.GetNetworkInputBindingInfo(graph_id, "normalized_input_image_tensor")
+    input_binding_info = parser.GetNetworkInputBindingInfo(graph_id, "input_1")
 
-    input_tensor_data = np.array(Image.open(os.path.join(shared_data_folder, 'cococat.jpeg')).resize((300, 300)), dtype=np.uint8)
+    input_tensor_data = np.load(os.path.join(shared_data_folder, 'tflite_parser/input_lite.npy'))
 
     preferred_backends = [ann.BackendId('CpuRef')]
 
@@ -158,26 +159,18 @@ def test_enqueue_workload_fails_with_empty_input_tensors(random_runtime):
     assert expected_error_message in str(err.value)
 
 
-@pytest.mark.skipif(platform.processor() != 'x86_64', reason="Only run on x86, this is because these are exact results "
-                                                             "for x86 only. The Juno produces slightly different "
-                                                             "results meaning this test would fail.")
+@pytest.mark.x86_64
 @pytest.mark.parametrize('count', [5])
-def test_multiple_inference_runs_yield_same_result(count, mobilenet_ssd_runtime):
+def test_multiple_inference_runs_yield_same_result(count, mock_model_runtime):
     """
     Test that results remain consistent among multiple runs of the same inference.
     """
-    runtime = mobilenet_ssd_runtime[0]
-    net_id = mobilenet_ssd_runtime[1]
-    input_tensors = mobilenet_ssd_runtime[2]
-    output_tensors = mobilenet_ssd_runtime[3]
+    runtime = mock_model_runtime[0]
+    net_id = mock_model_runtime[1]
+    input_tensors = mock_model_runtime[2]
+    output_tensors = mock_model_runtime[3]
 
-    expected_results = [[0.17047899961471558, 0.22598055005073547, 0.8146906495094299, 0.7677907943725586,
-                         0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                         0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                         0.0, 0.0, 0.0, 0.0],
-                        [16.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                        [0.80078125, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                        [1.0]]
+    expected_results = np.array([[4,  85, 108,  29,   8,  16,   0,   2,   5,   0]])
 
     for _ in range(count):
         runtime.EnqueueWorkload(net_id, input_tensors, output_tensors)
@@ -185,35 +178,25 @@ def test_multiple_inference_runs_yield_same_result(count, mobilenet_ssd_runtime)
         output_vectors = ann.workload_tensors_to_ndarray(output_tensors)
 
         for i in range(len(expected_results)):
-            assert all(output_vectors[i] == expected_results[i])
+            assert output_vectors[i].all() == expected_results[i].all()
 
 
-@pytest.mark.juno
-def test_juno_inference_results(mobilenet_ssd_runtime):
-    """
-    Test inference results are sensible on a Juno.
-    For the Juno we allow +/-3% compared to the results on x86.
-    """
-    runtime = mobilenet_ssd_runtime[0]
-    net_id = mobilenet_ssd_runtime[1]
-    input_tensors = mobilenet_ssd_runtime[2]
-    output_tensors = mobilenet_ssd_runtime[3]
+@pytest.mark.aarch64
+def test_aarch64_inference_results(mock_model_runtime):
+
+    runtime = mock_model_runtime[0]
+    net_id = mock_model_runtime[1]
+    input_tensors = mock_model_runtime[2]
+    output_tensors = mock_model_runtime[3]
 
     runtime.EnqueueWorkload(net_id, input_tensors, output_tensors)
 
     output_vectors = ann.workload_tensors_to_ndarray(output_tensors)
 
-    expected_outputs = [[pytest.approx(0.17047899961471558, 0.03), pytest.approx(0.22598055005073547, 0.03),
-                         pytest.approx(0.8146906495094299, 0.03), pytest.approx(0.7677907943725586, 0.03),
-                         0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                         0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                         0.0, 0.0, 0.0, 0.0],
-                        [16.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                        [0.80078125, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                        [1.0]]
+    expected_outputs = expected_results = np.array([[4,  85, 108,  29,   8,  16,   0,   2,   5,   0]])
 
     for i in range(len(expected_outputs)):
-        assert all(output_vectors[i] == expected_outputs[i])
+        assert output_vectors[i].all() == expected_results[i].all()
 
 
 def test_enqueue_workload_with_profiler(random_runtime):

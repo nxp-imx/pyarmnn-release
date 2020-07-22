@@ -1,8 +1,11 @@
-# Copyright © 2019 Arm Ltd. All rights reserved.
+# Copyright © 2020 Arm Ltd. All rights reserved.
 # SPDX-License-Identifier: MIT
 import os
+import platform
 
 import pytest
+
+ARCHITECTURES = set("x86_64 aarch64".split())
 
 
 @pytest.fixture(scope="module")
@@ -27,21 +30,23 @@ def shared_data_folder(request):
 @pytest.fixture(scope="function")
 def tmpdir(tmpdir):
     """
-        This fixture returns path to temp folder. Fixture was added for py35 compatibility 
+        This fixture returns path to temp folder. Fixture was added for py35 compatibility
     """
 
     return str(tmpdir)
 
 
-def pytest_addoption(parser):
-    parser.addoption('--juno', action='store_true', dest="juno",
-                     default=False, help="enable juno fpga related tests")
+def pytest_runtest_setup(item):
+    supported_architectures = ARCHITECTURES.intersection(mark.name for mark in item.iter_markers())
+    arch = platform.machine()
+    if supported_architectures and arch not in supported_architectures:
+        pytest.skip("cannot run on platform {}".format(arch))
 
 
 def pytest_configure(config):
     config.addinivalue_line(
-        "markers", "juno: mark test to run only on juno"
+        "markers", "aarch64: mark test to run only on aarch64"
     )
-
-    if not config.option.juno:
-        setattr(config.option, 'markexpr', 'not juno')
+    config.addinivalue_line(
+        "markers", "x86_64: mark test to run only on x86_64"
+    )

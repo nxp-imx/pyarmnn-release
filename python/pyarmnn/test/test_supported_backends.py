@@ -1,5 +1,5 @@
-# Copyright © 2019 Arm Ltd. All rights reserved.
-# SPDX-License-Identifier: MIT.
+# Copyright © 2020 Arm Ltd. All rights reserved.
+# SPDX-License-Identifier: MIT
 import os
 import platform
 import pytest
@@ -42,10 +42,9 @@ def test_get_supported_backends_cpu_ref(get_supported_backends_setup):
     assert "CpuRef" in map(lambda b: str(b), get_supported_backends_setup)
 
 
-@pytest.mark.juno
+@pytest.mark.aarch64
 class TestNoneCpuRefBackends:
 
-    @pytest.mark.parametrize("backend",["CpuAcc", "NpuAcc"])
+    @pytest.mark.parametrize("backend", ["CpuAcc"])
     def test_get_supported_backends_cpu_acc(self, get_supported_backends_setup, backend):
         assert backend in map(lambda b: str(b), get_supported_backends_setup)
-

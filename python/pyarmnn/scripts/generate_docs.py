@@ -38,21 +38,6 @@ def __copy_file_to_dir(file_paths: Union[List[str], str], target_dir_path: str):
         shutil.copyfile(file_path, os.path.join(str(target_dir_path), file_name))
 
 
-def copy_doc_images(dest_path):
-    """Copies document images to a directory.
-
-    Args:
-        dest_path (str): Destination directory.
-
-    Returns:
-        None
-    """
-    
-    diagram_filename = os.path.join(package_dir, 'images', 'pyarmnn.png')
-    __copy_file_to_dir(file_paths=[diagram_filename],
-                       target_dir_path=dest_path)
-
-
 def archive_docs(path: str, version: str):
     """Creates an archive.
 
@@ -71,12 +56,11 @@ def archive_docs(path: str, version: str):
 
 
 if __name__ == "__main__":
-    readme_filename = os.path.join(package_dir, 'README.md')
+    readme_filename = os.path.join(package_dir, '..', '..', 'README.md')
     with open(readme_filename, 'r') as readme_file:
         top_level_pyarmnn_doc = ''.join(readme_file.readlines())
         ann.__doc__ = top_level_pyarmnn_doc
 
     main()
     target_path = os.path.join(package_dir, 'docs')
-    copy_doc_images(os.path.join(target_path, 'pyarmnn', 'images'))
     archive_docs(target_path, ann.__version__)

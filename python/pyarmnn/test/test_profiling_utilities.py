@@ -1,5 +1,4 @@
-# Copyright © 2019 Arm Ltd. All rights reserved.
-# Copyright 2020 NXP
+# Copyright © 2020 Arm Ltd. All rights reserved.
 # SPDX-License-Identifier: MIT
 import os
 
@@ -18,12 +17,12 @@ class MockIProfiler:
 
 @pytest.fixture()
 def mock_profiler(shared_data_folder):
-    path_to_file = os.path.join(shared_data_folder, 'profile_out.json')
+    path_to_file = os.path.join(shared_data_folder, 'mock_profile_out.json')
     with open(path_to_file, 'r') as file:
         profiler_output = file.read()
         return MockIProfiler(profiler_output)
 
-@pytest.mark.skip(reason="No way to generate profile_out.json")
+
 def test_inference_exec(mock_profiler):
     profiling_data_obj = ann.get_profiling_data(mock_profiler)
 
@@ -31,31 +30,29 @@ def test_inference_exec(mock_profiler):
     assert (len(profiling_data_obj.per_workload_execution_data) > 0)
 
     # Check each total execution time
-    assert (profiling_data_obj.inference_data["execution_time"] == [16035243.953000, 16096248.590000, 16138614.290000,
-                                                                    16140544.388000, 16228118.274000, 16543585.760000])
+    assert (profiling_data_obj.inference_data["execution_time"] == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
     assert (profiling_data_obj.inference_data["time_unit"] == "us")
 
 
-@pytest.mark.parametrize("exec_times, unit, backend, workload", [([1233915.166, 1221125.149,
-                                                                   1228359.494, 1235065.662,
-                                                                   1244369.694, 1240633.922],
+@pytest.mark.parametrize("exec_times, unit, backend, workload", [([2, 2,
+                                                                   2, 2,
+                                                                   2, 2],
                                                                   'us',
                                                                   'CpuRef',
-                                                                  'RefConvolution2dWorkload_Execute_#25'),
-                                                                 ([270.64, 256.379,
-                                                                   269.664, 259.449,
-                                                                   266.65, 277.05],
+                                                                  'RefSomeMock1dWorkload_Execute_#5'),
+                                                                 ([2, 2,
+                                                                   2, 2,
+                                                                   2, 2],
                                                                   'us',
                                                                   'CpuAcc',
-                                                                  'NeonActivationWorkload_Execute_#70'),
-                                                                 ([715.474, 729.23,
-                                                                   711.325, 729.151,
-                                                                   741.231, 729.702],
+                                                                  'NeonSomeMock2Workload_Execute_#6'),
+                                                                 ([2, 2,
+                                                                   2, 2,
+                                                                   2, 2],
                                                                   'us',
                                                                   'GpuAcc',
-                                                                  'ClConvolution2dWorkload_Execute_#80')
+                                                                  'ClSomeMock3dWorkload_Execute_#7')
                                                                  ])
-@pytest.mark.skip(reason="No way to generate profile_out.json")
 def test_profiler_workloads(mock_profiler, exec_times, unit, backend, workload):
     profiling_data_obj = ann.get_profiling_data(mock_profiler)
 

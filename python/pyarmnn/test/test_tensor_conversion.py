@@ -1,4 +1,4 @@
-# Copyright © 2019 Arm Ltd. All rights reserved.
+# Copyright © 2020 Arm Ltd. All rights reserved.
 # SPDX-License-Identifier: MIT
 import os
 
@@ -13,10 +13,10 @@ def get_tensor_info_input(shared_data_folder):
     Sample input tensor information.
     """
     parser = ann.ITfLiteParser()
-    parser.CreateNetworkFromBinaryFile(os.path.join(shared_data_folder, 'ssd_mobilenetv1.tflite'))
+    parser.CreateNetworkFromBinaryFile(os.path.join(shared_data_folder, 'mock_model.tflite'))
     graph_id = 0
 
-    input_binding_info = [parser.GetNetworkInputBindingInfo(graph_id, 'normalized_input_image_tensor')]
+    input_binding_info = [parser.GetNetworkInputBindingInfo(graph_id, 'input_1')]
 
     yield input_binding_info
 
@@ -27,7 +27,7 @@ def get_tensor_info_output(shared_data_folder):
     Sample output tensor information.
     """
     parser = ann.ITfLiteParser()
-    parser.CreateNetworkFromBinaryFile(os.path.join(shared_data_folder, 'ssd_mobilenetv1.tflite'))
+    parser.CreateNetworkFromBinaryFile(os.path.join(shared_data_folder, 'mock_model.tflite'))
     graph_id = 0
 
     output_names = parser.GetSubgraphOutputTensorNames(graph_id)
@@ -59,21 +59,24 @@ def test_make_output_tensors(get_tensor_info_output):
     output_binding_info = get_tensor_info_output
 
     output_tensors = ann.make_output_tensors(output_binding_info)
-    assert len(output_tensors) == 4
+    assert len(output_tensors) == 1
 
     for tensor, tensor_info in zip(output_tensors, output_binding_info):
         assert type(tensor[1]) == ann.Tensor
         assert str(tensor[1].GetInfo()) == str(tensor_info[1])
 
 
+@pytest.mark.skip("Skipped.")
 def test_workload_tensors_to_ndarray(get_tensor_info_output):
+    # Check shape and size of output from workload_tensors_to_ndarray matches expected.
     output_binding_info = get_tensor_info_output
     output_tensors = ann.make_output_tensors(output_binding_info)
 
     data = ann.workload_tensors_to_ndarray(output_tensors)
 
     for i in range(0, len(output_tensors)):
-        assert len(data[i]) == output_tensors[i][1].GetNumElements()
+        assert data[i].shape == tuple(output_tensors[i][1].GetShape())
+        assert data[i].size == output_tensors[i][1].GetNumElements()
 
 
 def test_make_input_tensors_fp16(get_tensor_info_input):
@@ -83,7 +86,7 @@ def test_make_input_tensors_fp16(get_tensor_info_input):
 
     for tensor_id, tensor_info in input_tensor_info:
         input_data.append(np.random.randint(0, 255, size=(1, tensor_info.GetNumElements())).astype(np.float16))
-        tensor_info.SetDataType(ann.DataType_Float16) # set datatype to float16
+        tensor_info.SetDataType(ann.DataType_Float16)  # set datatype to float16
 
     input_tensors = ann.make_input_tensors(input_tensor_info, input_data)
     assert len(input_tensors) == 1
@@ -93,5 +96,5 @@ def test_make_input_tensors_fp16(get_tensor_info_input):
         assert type(tensor[1]).__name__ == 'ConstTensor'
         assert str(tensor[1].GetInfo()) == str(tensor_info[1])
         assert tensor[1].GetDataType() == ann.DataType_Float16
-        assert tensor[1].GetNumElements() == 270000
-        assert tensor[1].GetNumBytes() == 540000  # check each element is two byte
+        assert tensor[1].GetNumElements() == 28*28*1
+        assert tensor[1].GetNumBytes() == (28*28*1)*2  # check each element is two byte

@@ -1,4 +1,4 @@
-# Copyright © 2019 Arm Ltd. All rights reserved.
+# Copyright © 2020 Arm Ltd. All rights reserved.
 # SPDX-License-Identifier: MIT
 import pytest
 
@@ -82,7 +82,7 @@ class TestIInputIOutputIConnectable:
         assert 2 == output_tensor_info.GetNumDimensions()
         assert 6 == output_tensor_info.GetNumElements()
 
-       # Check Disconnect()
+        # Check Disconnect()
         assert output_get_input_connection.GetNumConnections() == 1  # 1 connection to Outputslot0 from input1
         add.GetOutputSlot(0).Disconnect(output.GetInputSlot(0))  # disconnect add.OutputSlot0 from Output.InputSlot0
         assert output_get_input_connection.GetNumConnections() == 0
@@ -140,4 +140,3 @@ class TestIInputIOutputIConnectable:
         add_get_input = add.GetInputSlot(0)
         add_get_input.GetConnection()
         assert isinstance(add_get_input, ann.IInputSlot)
-

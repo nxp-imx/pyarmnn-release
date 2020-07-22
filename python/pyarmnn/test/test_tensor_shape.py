@@ -1,4 +1,4 @@
-# Copyright © 2019 Arm Ltd. All rights reserved.
+# Copyright © 2020 Arm Ltd. All rights reserved.
 # SPDX-License-Identifier: MIT
 import pytest
 import pyarmnn as ann
@@ -17,9 +17,11 @@ def test_tensor_shape_one():
     assert 10 == tensor_shape.GetNumElements()
 
 
-@pytest.mark.skip("This will segfault before it reaches SWIG wrapper. ???")
 def test_tensor_shape_empty():
-    ann.TensorShape(())
+    with pytest.raises(RuntimeError) as err:
+        ann.TensorShape(())
+
+    assert "Tensor numDimensions must be greater than 0" in str(err.value)
 
 
 def test_tensor_shape_tuple_mess():
@@ -68,6 +70,7 @@ def test_tensor_shape__set_item_out_of_bounds():
             tensor_shape[i] = 1
 
     assert "Invalid dimension index: 3 (number of dimensions is 3)" in str(err.value)
+
 
 def test_tensor_shape___str__():
     tensor_shape = ann.TensorShape((1, 2, 3))

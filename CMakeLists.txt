@@ -14,7 +14,7 @@ foreach(cmake_file ${additional_cmake_files})
     include(${cmake_file})
 endforeach()
 
-if (BUILD_PYTHON_WHL_PACKAGE OR BUILD_PYTHON_SRC_PACKAGE)
+if (BUILD_PYTHON_SRC OR BUILD_PYTHON_WHL)
     add_subdirectory(python/pyarmnn)
 else()
     message(STATUS "Nothing to build :)")

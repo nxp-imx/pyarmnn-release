@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: MIT
 #
 
-option(BUILD_PYTHON_WHL_PACKAGE "Build Python wheel package" OFF)
-option(BUILD_PYTHON_SRC_PACKAGE "Build Python source package" OFF)
+option(BUILD_PYTHON_WHL "Build Python wheel package" OFF)
+option(BUILD_PYTHON_SRC "Build Python source package" OFF)
 option(ARMNN_LIB "Path to ArmNN libraries" OFF)
 option(ARMNN_INCLUDE "Path to ArmNN headers" OFF)
 
@@ -14,15 +14,15 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Setting and checking the python environment to be able to build whl/src packages
-if(BUILD_PYTHON_WHL_PACKAGE OR BUILD_PYTHON_SRC_PACKAGE)
+if(BUILD_PYTHON_WHL OR BUILD_PYTHON_SRC)
     find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
     
-    if(BUILD_PYTHON_WHL_PACKAGE)
+    if(BUILD_PYTHON_WHL)
         message(STATUS "PyArmNN wheel package is enabled")
     else()
         message(STATUS "PyArmNN wheel package is disabled")
     endif()
-    if(BUILD_PYTHON_SRC_PACKAGE)
+    if(BUILD_PYTHON_SRC)
         message(STATUS "PyArmNN source package is enabled")
     else()
         message(STATUS "PyArmNN source package is disabled")

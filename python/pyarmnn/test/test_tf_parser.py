@@ -1,4 +1,4 @@
-# Copyright © 2019 Arm Ltd. All rights reserved.
+# Copyright © 2020 Arm Ltd. All rights reserved.
 # SPDX-License-Identifier: MIT
 import os
 
@@ -10,20 +10,20 @@ import numpy as np
 @pytest.fixture()
 def parser(shared_data_folder):
     """
-    Parse and setup the test network (mobilenetv1) to be used for the tests below
+    Parse and setup the test network to be used for the tests below
     """
 
     # create tf parser
     parser = ann.ITfParser()
 
     # path to model
-    path_to_model = os.path.join(shared_data_folder, 'mobilenet_v1_1.0_224.pb')
+    path_to_model = os.path.join(shared_data_folder, 'mock_model.pb')
 
-    # tensor shape [1, 224, 224, 3]
-    tensorshape = {'input': ann.TensorShape((1, 224, 224, 3))}
+    # tensor shape [1, 28, 28, 1]
+    tensorshape = {'input': ann.TensorShape((1, 28, 28, 1))}
 
     # requested_outputs
-    requested_outputs = ["MobilenetV1/Predictions/Reshape_1"]
+    requested_outputs = ["output"]
 
     # parse tf binary & create network
     parser.CreateNetworkFromBinaryFile(path_to_model, tensorshape, requested_outputs)
@@ -49,18 +49,18 @@ def test_tf_parser_get_network_input_binding_info(parser):
     tensor = input_binding_info[1]
     assert tensor.GetDataType() == 1
     assert tensor.GetNumDimensions() == 4
-    assert tensor.GetNumElements() == 150528
+    assert tensor.GetNumElements() == 28*28*1
     assert tensor.GetQuantizationOffset() == 0
     assert tensor.GetQuantizationScale() == 0
 
 
 def test_tf_parser_get_network_output_binding_info(parser):
-    output_binding_info = parser.GetNetworkOutputBindingInfo("MobilenetV1/Predictions/Reshape_1")
+    output_binding_info = parser.GetNetworkOutputBindingInfo("output")
 
     tensor = output_binding_info[1]
     assert tensor.GetDataType() == 1
     assert tensor.GetNumDimensions() == 2
-    assert tensor.GetNumElements() == 1001
+    assert tensor.GetNumElements() == 10
     assert tensor.GetQuantizationOffset() == 0
     assert tensor.GetQuantizationScale() == 0
 
@@ -90,16 +90,16 @@ def test_tf_filenotfound_exception(shared_data_folder):
 def test_tf_parser_end_to_end(shared_data_folder):
     parser = ann.ITfParser = ann.ITfParser()
 
-    tensorshape = {'input': ann.TensorShape((1, 224, 224, 3))}
-    requested_outputs = ["MobilenetV1/Predictions/Reshape_1"]
+    tensorshape = {'input': ann.TensorShape((1, 28, 28, 1))}
+    requested_outputs = ["output"]
 
-    network = parser.CreateNetworkFromBinaryFile(os.path.join(shared_data_folder, 'mobilenet_v1_1.0_224.pb'),
+    network = parser.CreateNetworkFromBinaryFile(os.path.join(shared_data_folder, 'mock_model.pb'),
                                                  tensorshape, requested_outputs)
 
     input_binding_info = parser.GetNetworkInputBindingInfo("input")
 
-    # load test image data stored in input.npy
-    input_tensor_data = np.load(os.path.join(shared_data_folder, 'tf_parser/input.npy')).astype(np.float32)
+    # load test image data stored in input_tf.npy
+    input_tensor_data = np.load(os.path.join(shared_data_folder, 'tf_parser/input_tf.npy')).astype(np.float32)
 
     preferred_backends = [ann.BackendId('CpuAcc'), ann.BackendId('CpuRef')]
 
@@ -126,8 +126,8 @@ def test_tf_parser_end_to_end(shared_data_folder):
     runtime.EnqueueWorkload(net_id, input_tensors, output_tensors)
     output_vectors = ann.workload_tensors_to_ndarray(output_tensors)
 
-    # load golden output file to compare the output results with
-    golden_output = np.load(os.path.join(shared_data_folder, 'tf_parser/golden_output.npy'))
+    # Load golden output file for result comparison.
+    golden_output = np.load(os.path.join(shared_data_folder, 'tf_parser/golden_output_tf.npy'))
 
     # Check that output matches golden output to 4 decimal places (there are slight rounding differences after this)
-    np.testing.assert_almost_equal(output_vectors, golden_output, decimal=4)
+    np.testing.assert_almost_equal(output_vectors[0], golden_output, decimal=4)

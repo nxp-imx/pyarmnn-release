@@ -1,5 +1,4 @@
-# Copyright © 2019 Arm Ltd. All rights reserved.
-# Copyright 2020 NXP
+# Copyright © 2020 Arm Ltd. All rights reserved.
 # SPDX-License-Identifier: MIT
 import os
 
@@ -11,22 +10,22 @@ import numpy as np
 @pytest.fixture()
 def parser(shared_data_folder):
     """
-    Parse and setup the test network (alexnet) to be used for the tests below
+    Parse and setup the test network to be used for the tests below
     """
 
     # Create caffe parser
     parser = ann.ICaffeParser()
 
     # Specify path to model
-    path_to_model = os.path.join(shared_data_folder, 'squeezenet_v1.1_armnn.caffemodel')
+    path_to_model = os.path.join(shared_data_folder, 'mock_model.caffemodel')
 
-    # Specify the tensor shape relative to the input [1, 3, 227, 227]
-    tensor_shape = {'data': ann.TensorShape((1, 3, 227, 227))}
+    # Specify the tensor shape relative to the input [1, 1, 28, 28]
+    tensor_shape = {'Placeholder': ann.TensorShape((1, 1, 28, 28))}
 
     # Specify the requested_outputs
-    requested_outputs = ["prob"]
+    requested_outputs = ["output"]
 
-    # Parse tf binary & create network
+    # Parse caffe binary & create network
     parser.CreateNetworkFromBinaryFile(path_to_model, tensor_shape, requested_outputs)
 
     yield parser
@@ -37,7 +36,6 @@ def test_caffe_parser_swig_destroy():
     assert ann.ICaffeParser.__swig_destroy__.__name__ == "delete_ICaffeParser"
 
 
-@pytest.mark.skip(reason="\"Couldn't find requested output layer 'prob' in graph\" when loading squeezenet_v1.1_armnn.caffemodel.")
 def test_check_caffe_parser_swig_ownership(parser):
     # Check to see that SWIG has ownership for parser. This instructs SWIG to take
     # ownership of the return value. This allows the value to be automatically
@@ -45,29 +43,26 @@ def test_check_caffe_parser_swig_ownership(parser):
     assert parser.thisown
 
 
-@pytest.mark.skip(reason="\"Couldn't find requested output layer 'prob' in graph\" when loading squeezenet_v1.1_armnn.caffemodel.")
 def test_get_network_input_binding_info(parser):
-    input_binding_info = parser.GetNetworkInputBindingInfo("data")
+    input_binding_info = parser.GetNetworkInputBindingInfo("Placeholder")
 
     tensor = input_binding_info[1]
     assert tensor.GetDataType() == 1
     assert tensor.GetNumDimensions() == 4
-    assert tensor.GetNumElements() == 154587
+    assert tensor.GetNumElements() == 784
 
 
-@pytest.mark.skip(reason="\"Couldn't find requested output layer 'prob' in graph\" when loading squeezenet_v1.1_armnn.caffemodel.")
 def test_get_network_output_binding_info(parser):
-    output_binding_info1 = parser.GetNetworkOutputBindingInfo("prob")
+    output_binding_info1 = parser.GetNetworkOutputBindingInfo("output")
 
     # Check the tensor info retrieved from GetNetworkOutputBindingInfo
     tensor1 = output_binding_info1[1]
 
     assert tensor1.GetDataType() == 1
-    assert tensor1.GetNumDimensions() == 4
-    assert tensor1.GetNumElements() == 1000
+    assert tensor1.GetNumDimensions() == 2
+    assert tensor1.GetNumElements() == 10
 
-
-@pytest.mark.skip("Skipped. Currently there is a bug in armnn (RecordByRecordCaffeParser). To be enabled it once fixed.")
+@pytest.mark.skip("Skipped.")
 def test_filenotfound_exception(shared_data_folder):
     parser = ann.ICaffeParser()
 
@@ -88,16 +83,15 @@ def test_filenotfound_exception(shared_data_folder):
     assert 'Failed to open graph file' in str(err.value)
 
 
-@pytest.mark.skip(reason="\"Couldn't find requested output layer 'prob' in graph\" when loading squeezenet_v1.1_armnn.caffemodel.")
 def test_caffe_parser_end_to_end(shared_data_folder):
     parser = ann.ICaffeParser = ann.ICaffeParser()
 
     # Load the network specifying the inputs and outputs
-    input_name = "data"
-    tensor_shape = {input_name: ann.TensorShape((1, 3, 227, 227))}
-    requested_outputs = ["prob"]
+    input_name = "Placeholder"
+    tensor_shape = {input_name: ann.TensorShape((1, 1, 28, 28))}
+    requested_outputs = ["output"]
 
-    network = parser.CreateNetworkFromBinaryFile(os.path.join(shared_data_folder, 'squeezenet_v1.1_armnn.caffemodel'),
+    network = parser.CreateNetworkFromBinaryFile(os.path.join(shared_data_folder, 'mock_model.caffemodel'),
                                                  tensor_shape, requested_outputs)
 
     # Specify preferred backend
@@ -116,8 +110,8 @@ def test_caffe_parser_end_to_end(shared_data_folder):
 
     assert "" == messages
 
-    # Load test image data stored in golden_input.npy
-    input_tensor_data = np.load(os.path.join(shared_data_folder, 'caffe_parser/squeezenet_v1_1_input.npy'))
+    # Load test image data stored in input_caffe.npy
+    input_tensor_data = np.load(os.path.join(shared_data_folder, 'caffe_parser/input_caffe.npy')).astype(np.float32)
     input_tensors = ann.make_input_tensors([input_binding_info], [input_tensor_data])
 
     # Load output binding info and
@@ -127,12 +121,11 @@ def test_caffe_parser_end_to_end(shared_data_folder):
     output_tensors = ann.make_output_tensors(outputs_binding_info)
 
     runtime.EnqueueWorkload(net_id, input_tensors, output_tensors)
-    output_vectors = []
 
     output_vectors = ann.workload_tensors_to_ndarray(output_tensors)
 
-    # Load golden output file to compare the output results with
-    expected_output = np.load(os.path.join(shared_data_folder, 'caffe_parser/squeezenet_v1_1_output.npy'))
+    # Load golden output file for result comparison.
+    expected_output = np.load(os.path.join(shared_data_folder, 'caffe_parser/golden_output_caffe.npy'))
 
     # Check that output matches golden output to 4 decimal places (there are slight rounding differences after this)
-    np.testing.assert_almost_equal(output_vectors, expected_output, 4)
+    np.testing.assert_almost_equal(output_vectors[0], expected_output, 4)
