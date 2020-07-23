@@ -80,10 +80,11 @@ make
 <pre><code class="bash">cd python/pyarmnn
 </code></pre>
 <h5 id="1-set-environment">1. Set environment:</h5>
-<p><code>ARMNN_INCLUDE</code> and <code>ARMNN_LIB</code> are mandatory and should point to Arm NN headers and libraries against which you will be generating the wrappers. <code>SWIG_EXECUTABLE</code> should only be set if you have multiple versions of SWIG installed or you used a custom location for your installation:</p>
+<p><code>ARMNN_INCLUDE</code> and <code>ARMNN_LIB</code> are mandatory and should point to Arm NN headers and libraries against which you will be generating the wrappers. <code>SWIG_EXECUTABLE</code> should only be set if you have multiple versions of SWIG installed or you used a custom location for your installation. You should also run the commands from the <code>python/pyarmnn</code> directory:</p>
 <pre><code class="bash">export SWIG_EXECUTABLE=&lt;path_to_swig_exec&gt;
 export ARMNN_INCLUDE=&lt;path_to_armnn_include&gt;
 export ARMNN_LIB=&lt;path_to_armnn_libraries&gt;
+cd python/pyarmnn
 </code></pre>
 <h5 id="2-clean-and-build-swig-wrappers">2. Clean and build SWIG wrappers:</h5>
 <pre><code class="bash">python setup.py clean --all
@@ -180,27 +181,30 @@ print(results)
 <h4 id="examples">Examples</h4>
 <p>To further explore PyArmNN API there are several examples provided in the examples folder running classification on an image. To run them first install the dependencies:
 ```bash
-$ pip install -r examples/requirements.txt</p>
+cd python/pyarmnn
+pip install -r examples/requirements.txt</p>
 <pre><code>Afterwards simply execute the example scripts, e.g.:
  ```bash
-$ python tflite_mobilenetv1_quantized.py
+python tflite_mobilenetv1_quantized.py
 </code></pre>
 <p>All resources are downloaded during execution, so if you do not have access to the internet, you may need to download these manually. <code>example_utils.py</code> contains code shared between the examples.</p>
 <h2 id="tox-for-automation">Tox for automation</h2>
 <p>To make things easier <em>tox</em> is available for automating individual tasks or running multiple commands at once such as generating wrappers, running unit tests using multiple python versions or generating documentation. To run it use:</p>
-<pre><code class="bash">$ tox &lt;task_name&gt;
+<pre><code class="bash">tox &lt;task_name&gt;
 </code></pre>
 <p>See <em>tox.ini</em> for the list of tasks. You may also modify it for your own purposes. To dive deeper into tox read through <a href="https://tox.readthedocs.io/en/latest/">https://tox.readthedocs.io/en/latest/</a></p>
 <p>Tox is inteded for easier automation, so you may have to modify the script slightly to work with your environment. We do not guarantee, that it works out of the box.</p>
 <h2 id="running-unit-tests">Running unit-tests</h2>
-<p>Download resources required to run unit tests by executing the script in the scripts folder:</p>
-<pre><code>$ python ./scripts/download_test_resources.py
+<p>Download resources required to run unit tests by executing the script from the <code>python/pyarmnn</code> directory. You will also need to install required python modules.</p>
+<pre><code class="bash">cd python/pyarmnn
+pip install -r test/requirements.txt
+python ./scripts/download_test_resources.py
 </code></pre>
 <p>The script will download an archive from the Linaro server and extract it. A folder <code>test/testdata/shared</code> will be created. Execute <code>pytest</code> from the project root dir:</p>
-<pre><code class="bash">$ python -m pytest test/ -v
+<pre><code class="bash">python -m pytest test/ -v
 </code></pre>
 <p>or run tox which will do both:</p>
-<pre><code class="bash">$ tox
+<pre><code class="bash">tox
 </code></pre>
 <h2 id="prebuilt-wheels">Prebuilt wheels</h2>
 <p>Prebuilt wheel packages (even older versions) can be found in the <code>whl</code> directory.</p>
@@ -262,24 +266,6 @@ $ python tflite_mobilenetv1_quantized.py
 <dt><code>str</code></dt>
 <dd>Full version of Arm NN installed.</dd>
 </dl></div>
-</dd>
-<dt id="pyarmnn.ICaffeParser"><code class="name flex">
-<span>def <span class="ident">ICaffeParser</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="pyarmnn.IOnnxParser"><code class="name flex">
-<span>def <span class="ident">IOnnxParser</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="pyarmnn.ITfParser"><code class="name flex">
-<span>def <span class="ident">ITfParser</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
 </dd>
 <dt id="pyarmnn.Optimize"><code class="name flex">
 <span>def <span class="ident">Optimize</span></span>(<span>*args)</span>
@@ -1067,6 +1053,75 @@ m_TransposeWeightMatrix (bool): Enable/disable transpose weight matrix. Default:
 <dt id="pyarmnn.FullyConnectedDescriptor.thisown"><code class="name">var <span class="ident">thisown</span></code></dt>
 <dd>
 <div class="desc"><p>The membership flag</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="pyarmnn.ICaffeParser"><code class="flex name class">
+<span>class <span class="ident">ICaffeParser</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Interface for creating a parser object using Caffe (<a href="http://caffe.berkeleyvision.org/">http://caffe.berkeleyvision.org/</a>) caffemodel files.</p>
+<p>Parsers are used to automatically construct Arm NN graphs from model files.</p></div>
+<h3>Instance variables</h3>
+<dl>
+<dt id="pyarmnn.ICaffeParser.thisown"><code class="name">var <span class="ident">thisown</span></code></dt>
+<dd>
+<div class="desc"><p>The membership flag</p></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="pyarmnn.ICaffeParser.CreateNetworkFromBinaryFile"><code class="name flex">
+<span>def <span class="ident">CreateNetworkFromBinaryFile</span></span>(<span>self, graphFile, inputShapes, requestedOutputs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create the network from a Caffe caffemodel binary file on disk.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>graphFile</code></strong></dt>
+<dd>Path to the caffe model to be parsed.</dd>
+<dt><strong><code>inputShapes</code></strong> :&ensp;<code>tuple</code></dt>
+<dd>(<code>string</code>, <code><a title="pyarmnn.TensorShape" href="#pyarmnn.TensorShape">TensorShape</a></code>) A tuple containing the input name and TensorShape information for the network.</dd>
+<dt><strong><code>requestedOutputs</code></strong> :&ensp;<code>list</code></dt>
+<dd>A list of the output tensor names.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="pyarmnn.INetwork" href="#pyarmnn.INetwork">INetwork</a></code></dt>
+<dd>INetwork object for the parsed Caffe model.</dd>
+</dl></div>
+</dd>
+<dt id="pyarmnn.ICaffeParser.GetNetworkInputBindingInfo"><code class="name flex">
+<span>def <span class="ident">GetNetworkInputBindingInfo</span></span>(<span>self, name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieve binding info (layer id and tensor info) for the network input identified by the given layer name.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of the input.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple</code></dt>
+<dd>(<code>int</code>, <code><a title="pyarmnn.TensorInfo" href="#pyarmnn.TensorInfo">TensorInfo</a></code>)</dd>
+</dl></div>
+</dd>
+<dt id="pyarmnn.ICaffeParser.GetNetworkOutputBindingInfo"><code class="name flex">
+<span>def <span class="ident">GetNetworkOutputBindingInfo</span></span>(<span>self, name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieve binding info (layer id and tensor info) for the network output identified by the given layer name.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of the output.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple</code></dt>
+<dd>(<code>int</code>, <code><a title="pyarmnn.TensorInfo" href="#pyarmnn.TensorInfo">TensorInfo</a></code>)</dd>
+</dl></div>
 </dd>
 </dl>
 </dd>
@@ -1999,6 +2054,76 @@ must have a scale of 1/256 and an offset of 0.</p>
 </dd>
 </dl>
 </dd>
+<dt id="pyarmnn.IOnnxParser"><code class="flex name class">
+<span>class <span class="ident">IOnnxParser</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Interface for creating a parser object using ONNX (<a href="https://onnx.ai/">https://onnx.ai/</a>) onnx files.</p>
+<p>Parsers are used to automatically construct Arm NN graphs from model files.</p></div>
+<h3>Instance variables</h3>
+<dl>
+<dt id="pyarmnn.IOnnxParser.thisown"><code class="name">var <span class="ident">thisown</span></code></dt>
+<dd>
+<div class="desc"><p>The membership flag</p></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="pyarmnn.IOnnxParser.CreateNetworkFromBinaryFile"><code class="name flex">
+<span>def <span class="ident">CreateNetworkFromBinaryFile</span></span>(<span>self, graphFile)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create the network from a binary file on disk.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>graphFile</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to the onnx model to be parsed.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="pyarmnn.INetwork" href="#pyarmnn.INetwork">INetwork</a></code></dt>
+<dd>Parsed network.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>RuntimeError</code></dt>
+<dd>If model file was not found.</dd>
+</dl></div>
+</dd>
+<dt id="pyarmnn.IOnnxParser.GetNetworkInputBindingInfo"><code class="name flex">
+<span>def <span class="ident">GetNetworkInputBindingInfo</span></span>(<span>self, name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieve binding info (layer id and tensor info) for the network input identified by the given layer name.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>string</code></dt>
+<dd>Name of the input node.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple</code></dt>
+<dd>(<code>int</code>, <code><a title="pyarmnn.TensorInfo" href="#pyarmnn.TensorInfo">TensorInfo</a></code>)</dd>
+</dl></div>
+</dd>
+<dt id="pyarmnn.IOnnxParser.GetNetworkOutputBindingInfo"><code class="name flex">
+<span>def <span class="ident">GetNetworkOutputBindingInfo</span></span>(<span>self, name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieve binding info (layer id and tensor info) for the network output identified by the given layer name.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>string</code></dt>
+<dd>Name of the output node.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple</code></dt>
+<dd>(<code>int</code>, <code><a title="pyarmnn.TensorInfo" href="#pyarmnn.TensorInfo">TensorInfo</a></code>)</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
 <dt id="pyarmnn.IOptimizedNetwork"><code class="flex name class">
 <span>class <span class="ident">IOptimizedNetwork</span></span>
 <span>(</span><span>*args, **kwargs)</span>
@@ -2516,6 +2641,80 @@ The runtime takes ownership of the network once passed in.</p>
 <dl>
 <dt><code>list</code></dt>
 <dd>A list of the output tensor names for the given model.</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+<dt id="pyarmnn.ITfParser"><code class="flex name class">
+<span>class <span class="ident">ITfParser</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Interface for creating a parser object using TensorFlow (<a href="https://www.tensorflow.org/">https://www.tensorflow.org/</a>) frozen pb files.</p>
+<p>Parsers are used to automatically construct Arm NN graphs from model files.</p></div>
+<h3>Instance variables</h3>
+<dl>
+<dt id="pyarmnn.ITfParser.thisown"><code class="name">var <span class="ident">thisown</span></code></dt>
+<dd>
+<div class="desc"><p>The membership flag</p></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="pyarmnn.ITfParser.CreateNetworkFromBinaryFile"><code class="name flex">
+<span>def <span class="ident">CreateNetworkFromBinaryFile</span></span>(<span>self, graphFile, inputShapes, requestedOutputs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create the network from a pb Protocol buffer file.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>graphFile</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to the tf model to be parsed.</dd>
+<dt><strong><code>inputShapes</code></strong> :&ensp;<code>dict</code></dt>
+<dd>A dict containing the input name as a key &amp; TensorShape as a value.</dd>
+<dt><strong><code>requestedOutputs</code></strong> :&ensp;<code>list</code> of <code>str</code></dt>
+<dd>A list of the output tensor names.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="pyarmnn.INetwork" href="#pyarmnn.INetwork">INetwork</a></code></dt>
+<dd>Parsed network.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>RuntimeError</code></dt>
+<dd>If model file was not found.</dd>
+</dl></div>
+</dd>
+<dt id="pyarmnn.ITfParser.GetNetworkInputBindingInfo"><code class="name flex">
+<span>def <span class="ident">GetNetworkInputBindingInfo</span></span>(<span>self, name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieve binding info (layer id and tensor info) for the network input identified by the given layer name.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of the input.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple</code></dt>
+<dd>(<code>int</code>, <code><a title="pyarmnn.TensorInfo" href="#pyarmnn.TensorInfo">TensorInfo</a></code>).</dd>
+</dl></div>
+</dd>
+<dt id="pyarmnn.ITfParser.GetNetworkOutputBindingInfo"><code class="name flex">
+<span>def <span class="ident">GetNetworkOutputBindingInfo</span></span>(<span>self, name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieve binding info (layer id and tensor info) for the network output identified by the given layer name.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of the output.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple</code></dt>
+<dd>(<code>int</code>, <code><a title="pyarmnn.TensorInfo" href="#pyarmnn.TensorInfo">TensorInfo</a></code>).</dd>
 </dl></div>
 </dd>
 </dl>
@@ -3802,9 +4001,6 @@ m_DataLayout (int): The data layout to be used (DataLayout_NCHW, DataLayout_NHWC
 <li><code><a title="pyarmnn.GetMajorVersion" href="#pyarmnn.GetMajorVersion">GetMajorVersion</a></code></li>
 <li><code><a title="pyarmnn.GetMinorVersion" href="#pyarmnn.GetMinorVersion">GetMinorVersion</a></code></li>
 <li><code><a title="pyarmnn.GetVersion" href="#pyarmnn.GetVersion">GetVersion</a></code></li>
-<li><code><a title="pyarmnn.ICaffeParser" href="#pyarmnn.ICaffeParser">ICaffeParser</a></code></li>
-<li><code><a title="pyarmnn.IOnnxParser" href="#pyarmnn.IOnnxParser">IOnnxParser</a></code></li>
-<li><code><a title="pyarmnn.ITfParser" href="#pyarmnn.ITfParser">ITfParser</a></code></li>
 <li><code><a title="pyarmnn.Optimize" href="#pyarmnn.Optimize">Optimize</a></code></li>
 <li><code><a title="pyarmnn.dequantize" href="#pyarmnn.dequantize">dequantize</a></code></li>
 <li><code><a title="pyarmnn.get_profiling_data" href="#pyarmnn.get_profiling_data">get_profiling_data</a></code></li>
@@ -3943,6 +4139,15 @@ m_DataLayout (int): The data layout to be used (DataLayout_NCHW, DataLayout_NHWC
 </ul>
 </li>
 <li>
+<h4><code><a title="pyarmnn.ICaffeParser" href="#pyarmnn.ICaffeParser">ICaffeParser</a></code></h4>
+<ul class="">
+<li><code><a title="pyarmnn.ICaffeParser.CreateNetworkFromBinaryFile" href="#pyarmnn.ICaffeParser.CreateNetworkFromBinaryFile">CreateNetworkFromBinaryFile</a></code></li>
+<li><code><a title="pyarmnn.ICaffeParser.GetNetworkInputBindingInfo" href="#pyarmnn.ICaffeParser.GetNetworkInputBindingInfo">GetNetworkInputBindingInfo</a></code></li>
+<li><code><a title="pyarmnn.ICaffeParser.GetNetworkOutputBindingInfo" href="#pyarmnn.ICaffeParser.GetNetworkOutputBindingInfo">GetNetworkOutputBindingInfo</a></code></li>
+<li><code><a title="pyarmnn.ICaffeParser.thisown" href="#pyarmnn.ICaffeParser.thisown">thisown</a></code></li>
+</ul>
+</li>
+<li>
 <h4><code><a title="pyarmnn.IConnectableLayer" href="#pyarmnn.IConnectableLayer">IConnectableLayer</a></code></h4>
 <ul class="two-column">
 <li><code><a title="pyarmnn.IConnectableLayer.GetGuid" href="#pyarmnn.IConnectableLayer.GetGuid">GetGuid</a></code></li>
@@ -4017,6 +4222,15 @@ m_DataLayout (int): The data layout to be used (DataLayout_NCHW, DataLayout_NHWC
 </ul>
 </li>
 <li>
+<h4><code><a title="pyarmnn.IOnnxParser" href="#pyarmnn.IOnnxParser">IOnnxParser</a></code></h4>
+<ul class="">
+<li><code><a title="pyarmnn.IOnnxParser.CreateNetworkFromBinaryFile" href="#pyarmnn.IOnnxParser.CreateNetworkFromBinaryFile">CreateNetworkFromBinaryFile</a></code></li>
+<li><code><a title="pyarmnn.IOnnxParser.GetNetworkInputBindingInfo" href="#pyarmnn.IOnnxParser.GetNetworkInputBindingInfo">GetNetworkInputBindingInfo</a></code></li>
+<li><code><a title="pyarmnn.IOnnxParser.GetNetworkOutputBindingInfo" href="#pyarmnn.IOnnxParser.GetNetworkOutputBindingInfo">GetNetworkOutputBindingInfo</a></code></li>
+<li><code><a title="pyarmnn.IOnnxParser.thisown" href="#pyarmnn.IOnnxParser.thisown">thisown</a></code></li>
+</ul>
+</li>
+<li>
 <h4><code><a title="pyarmnn.IOptimizedNetwork" href="#pyarmnn.IOptimizedNetwork">IOptimizedNetwork</a></code></h4>
 <ul class="">
 <li><code><a title="pyarmnn.IOptimizedNetwork.SerializeToDot" href="#pyarmnn.IOptimizedNetwork.SerializeToDot">SerializeToDot</a></code></li>
@@ -4071,6 +4285,15 @@ m_DataLayout (int): The data layout to be used (DataLayout_NCHW, DataLayout_NHWC
 <li><code><a title="pyarmnn.ITfLiteParser.GetSubgraphInputTensorNames" href="#pyarmnn.ITfLiteParser.GetSubgraphInputTensorNames">GetSubgraphInputTensorNames</a></code></li>
 <li><code><a title="pyarmnn.ITfLiteParser.GetSubgraphOutputTensorNames" href="#pyarmnn.ITfLiteParser.GetSubgraphOutputTensorNames">GetSubgraphOutputTensorNames</a></code></li>
 <li><code><a title="pyarmnn.ITfLiteParser.thisown" href="#pyarmnn.ITfLiteParser.thisown">thisown</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyarmnn.ITfParser" href="#pyarmnn.ITfParser">ITfParser</a></code></h4>
+<ul class="">
+<li><code><a title="pyarmnn.ITfParser.CreateNetworkFromBinaryFile" href="#pyarmnn.ITfParser.CreateNetworkFromBinaryFile">CreateNetworkFromBinaryFile</a></code></li>
+<li><code><a title="pyarmnn.ITfParser.GetNetworkInputBindingInfo" href="#pyarmnn.ITfParser.GetNetworkInputBindingInfo">GetNetworkInputBindingInfo</a></code></li>
+<li><code><a title="pyarmnn.ITfParser.GetNetworkOutputBindingInfo" href="#pyarmnn.ITfParser.GetNetworkOutputBindingInfo">GetNetworkOutputBindingInfo</a></code></li>
+<li><code><a title="pyarmnn.ITfParser.thisown" href="#pyarmnn.ITfParser.thisown">thisown</a></code></li>
 </ul>
 </li>
 <li>

@@ -1,4 +1,4 @@
-requests==2.24.0
-urllib3==1.25.8
-Pillow==6.1.0
-numpy==1.18.1
+requests>=2.24.0
+urllib3>=1.25.8
+Pillow>=6.2.2
+numpy>=1.18.1
