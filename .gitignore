@@ -5,4 +5,5 @@ python/pyarmnn/src/pyarmnn/_generated/
 python/pyarmnn/pyarmnn_docs-*
 python/pyarmnn/cmake_install.cmake
 python/pyarmnn/CMakeCache.txt
-python/pyarmnn/test/testdata/*
+python/pyarmnn/test/testdata/
+env/
