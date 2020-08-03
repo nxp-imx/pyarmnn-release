@@ -1,4 +1,4 @@
-# Copyright © 2019 Arm Ltd. All rights reserved.
+# Copyright © 2020 Arm Ltd. All rights reserved.
 # SPDX-License-Identifier: MIT
 """
 This file contains functions relating to WorkloadTensors.
@@ -34,8 +34,9 @@ def make_input_tensors(inputs_binding_info: List[Tuple],
         >>> input_tensors = ann.make_input_tensors([input_binding_info], [example_image])
 
     Args:
-        inputs_binding_info (list of tuples): (int, `TensorInfo`) Binding information for input tensors obtained from `GetNetworkInputBindingInfo`.
-        input_data (ndarray): Tensor data to be used for inference.
+        inputs_binding_info (list of tuples): (int, `TensorInfo`) Binding information for input tensors obtained from
+                                              `GetNetworkInputBindingInfo`.
+        input_data (list ndarrays): Tensor data to be used for inference.
 
     Returns:
         list: `inputTensors` - A list of tuples (`int` , `ConstTensor`).
@@ -75,7 +76,8 @@ def make_output_tensors(outputs_binding_info: List[Tuple]) -> List[Tuple[int, Te
         >>> output_tensors = ann.make_output_tensors([output_binding_info])
 
     Args:
-        outputs_binding_info (list of tuples): (int, `TensorInfo`) Binding information for output tensors obtained from `GetNetworkOutputBindingInfo`.
+        outputs_binding_info (list of tuples): (int, `TensorInfo`) Binding information for output tensors obtained from
+                                               `GetNetworkOutputBindingInfo`.
 
     Returns:
         list: `outputTensors` - A list of tuples (`int`, `Tensor`).
@@ -107,17 +109,18 @@ def workload_tensors_to_ndarray(workload_tensors: List[Tuple[int, Union[Tensor, 
         >>> ...
         >>> runtime.EnqueueWorkload(net_id, input_tensors, output_tensors)
         >>>
-        >>> inference_results = tensors_to_ndarray(output_tensors)
+        >>> inference_results = workload_tensors_to_ndarray(output_tensors)
 
     Args:
-        workload_tensors (inputTensors or outputTensors): `inputTensors` or `outputTensors` to get data from.
+        workload_tensors (inputTensors or outputTensors): `inputTensors` or `outputTensors` to get data from. See
+                                                          `make_input_tensors` and `make_output_tensors`.
 
     Returns:
         list: List of `ndarrays` for the underlying tensor data from given `inputTensors` or `outputTensors`.
     """
     arrays = []
     for index, (_, tensor) in enumerate(workload_tensors):
-        arrays.append(tensor.get_memory_area())
+        arrays.append(tensor.get_memory_area().reshape(list(tensor.GetShape())))
         print("Workload tensor {} shape: {}".format(index, tensor.GetShape()))
 
     return arrays

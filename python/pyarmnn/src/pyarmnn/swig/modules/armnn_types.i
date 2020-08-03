@@ -1,5 +1,5 @@
 //
-// Copyright © 2017 Arm Ltd. All rights reserved.
+// Copyright © 2020 Arm Ltd. All rights reserved.
 // SPDX-License-Identifier: MIT
 //
 %{
@@ -19,7 +19,7 @@ Vector used to permute a tensor.
 For a 4-d tensor laid out in a memory with the format (Batch Element, Height, Width, Channels),
 which is to be passed as an input to Arm NN, each source dimension is mapped to the corresponding
 Arm NN dimension. The Batch dimension remains the same (0 -> 0). The source Height dimension is mapped
-to the location of the ArmNN Height dimension (1 -> 2). Similar arguments are made for the Width and
+to the location of the Arm NN Height dimension (1 -> 2). Similar arguments are made for the Width and
 Channels (2 -> 3 and 3 -> 1). This will lead to m_DimMappings pointing to the following array:
 [ 0, 2, 3, 1 ].
 
@@ -107,7 +107,11 @@ Returns:
 
 %ignore ProfilingGuid;
 %ignore PermutationVector;
+#define ARMNN_DEPRECATED_ENUM  // SWIG does not support C++ attributes, need this to help generate from Deprecated.hpp.
+#define ARMNN_DEPRECATED_ENUM_MSG(message)  // SWIG does not support C++ attributes, need this to help generate from Deprecated.hpp.
 %include "armnn/Types.hpp"
+
+
 
 %extend armnn::IDeviceSpec {
 

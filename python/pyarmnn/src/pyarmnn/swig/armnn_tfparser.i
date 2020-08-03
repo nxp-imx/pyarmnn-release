@@ -1,5 +1,5 @@
 //
-// Copyright © 2017 Arm Ltd. All rights reserved.
+// Copyright © 2020 Arm Ltd. All rights reserved.
 // SPDX-License-Identifier: MIT
 //
 %module pyarmnn_tfparser
@@ -33,7 +33,7 @@ class ITfParser
 public:
     %feature("docstring",
         "
-        Retrieve binding info (layer id and tensor info) for the network input identified by the given layer name.
+        Retrieve binding info (layer id and `TensorInfo`) for the network input identified by the given layer name.
 
         Args:
             name (str): Name of the input.
@@ -45,7 +45,7 @@ public:
 
     %feature("docstring",
         "
-        Retrieve binding info (layer id and tensor info) for the network output identified by the given layer name.
+        Retrieve binding info (layer id and `TensorInfo`) for the network output identified by the given layer name.
 
         Args:
             name (str): Name of the output.
@@ -79,7 +79,7 @@ public:
 
     Args:
         graphFile (str): Path to the tf model to be parsed.
-        inputShapes (dict): A dict containing the input name as a key & TensorShape as a value.
+        inputShapes (dict): A dict containing the input name as a key and `TensorShape` as a value.
         requestedOutputs (list of str): A list of the output tensor names.
 
     Returns:

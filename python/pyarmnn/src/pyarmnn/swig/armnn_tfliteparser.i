@@ -1,5 +1,5 @@
 //
-// Copyright © 2017 Arm Ltd. All rights reserved.
+// Copyright © 2020 Arm Ltd. All rights reserved.
 // SPDX-License-Identifier: MIT
 //
 %module pyarmnn_tfliteparser
@@ -45,10 +45,10 @@ public:
 
     %feature("docstring",
         "
-        Retrieve binding info (layer id and tensor info) for the network output identified by the given layer name and subgraph id.
+        Retrieve binding info (layer id and `TensorInfo`) for the network output identified by the given layer name and subgraph id.
 
         Args:
-            subgraphId (int): The subgraphID.
+            subgraphId (int): The subgraph id.
             name (str): Name of the output.
 
         Returns:

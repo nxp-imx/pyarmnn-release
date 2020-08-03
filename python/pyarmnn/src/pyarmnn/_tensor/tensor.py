@@ -1,13 +1,16 @@
-# Copyright © 2019 Arm Ltd. All rights reserved.
+# Copyright © 2020 Arm Ltd. All rights reserved.
 # SPDX-License-Identifier: MIT
+"""
+This file contains the custom python implementation for Arm NN Tensor objects.
+"""
 import numpy as np
 
-from .._generated.pyarmnn import Tensor as annTensor, TensorInfo, DataType_QuantisedAsymm8, \
-    DataType_Float32, DataType_QuantisedSymm16, DataType_Signed32, DataType_Float16
+from .._generated.pyarmnn import Tensor as annTensor, TensorInfo, DataType_QAsymmU8, DataType_QSymmS8, \
+    DataType_QAsymmS8, DataType_Float32, DataType_QSymmS16, DataType_Signed32, DataType_Float16
 
 
 class Tensor(annTensor):
-    """pyArmnn Tensor object
+    """Creates a PyArmNN Tensor object.
 
     This class overrides the swig generated Tensor class. The aim of
     this is to create an easy to use public api for the Tensor object.
@@ -21,11 +24,13 @@ class Tensor(annTensor):
         """ Create Tensor object.
 
         Supported tensor data types:
-            DataType_QuantisedAsymm8,
-            DataType_QuantisedSymm16,
-            DataType_Signed32,
-            DataType_Float32,
-            DataType_Float16
+            `DataType_QAsymmU8`,
+            `DataType_QAsymmS8`,
+            `DataType_QSymmS16`,
+            `DataType_QSymmS8`,
+            `DataType_Signed32`,
+            `DataType_Float32`,
+            `DataType_Float16`
 
         Examples:
             Create an empty tensor
@@ -98,9 +103,11 @@ class Tensor(annTensor):
             num_elements (int): Determines the size of the memory area that will be created.
 
         """
-        np_data_type_mapping = {DataType_QuantisedAsymm8: np.uint8,
+        np_data_type_mapping = {DataType_QAsymmU8: np.uint8,
+                                DataType_QAsymmS8: np.int8,
+                                DataType_QSymmS8: np.int8,
                                 DataType_Float32: np.float32,
-                                DataType_QuantisedSymm16: np.int16,
+                                DataType_QSymmS16: np.int16,
                                 DataType_Signed32: np.int32,
                                 DataType_Float16: np.float16}
 

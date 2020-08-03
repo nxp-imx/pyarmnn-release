@@ -1,9 +1,12 @@
-# Copyright © 2019 Arm Ltd. All rights reserved.
+# Copyright © 2020 Arm Ltd. All rights reserved.
 # SPDX-License-Identifier: MIT
+"""
+This file contains the custom python implementation for Arm NN Const Tensor objects.
+"""
 import numpy as np
 
-from .._generated.pyarmnn import DataType_QuantisedAsymm8, DataType_QuantisedSymm16, DataType_Signed32, \
-    DataType_Float32, DataType_Float16
+from .._generated.pyarmnn import DataType_QAsymmU8, DataType_QSymmS8, DataType_QSymmS16, DataType_Signed32, \
+    DataType_QAsymmS8, DataType_Float32, DataType_Float16
 from .._generated.pyarmnn import ConstTensor as AnnConstTensor, TensorInfo, Tensor
 
 
@@ -21,19 +24,22 @@ class ConstTensor(AnnConstTensor):
     def __init__(self, *args):
         """
         Supported tensor data types:
-            DataType_QuantisedAsymm8,
-            DataType_QuantisedSymm16,
-            DataType_Signed32,
-            DataType_Float32,
-            DataType_Float16
+            `DataType_QAsymmU8`,
+            `DataType_QAsymmS8`,
+            `DataType_QSymmS16`,
+            `DataType_QSymmS8`,
+            `DataType_Signed32`,
+            `DataType_Float32`,
+            `DataType_Float16`
 
         Examples:
             Create empty ConstTensor
             >>> import pyarmnn as ann
+            >>> import numpy as np
             >>> ann.ConstTensor()
 
             Create ConstTensor given tensor info and input data
-            >>> input_data = ... #  numpy array
+            >>> input_data = np.array(...)
             >>> ann.ConstTensor(ann.TensorInfo(...), input_data)
 
             Create ConstTensor from another ConstTensor i.e. copy ConstTensor
@@ -46,7 +52,7 @@ class ConstTensor(AnnConstTensor):
             tensor (Tensor, optional): Create a ConstTensor from a Tensor.
             const_tensor (ConstTensor, optional): Create a ConstTensor from a ConstTensor i.e. copy.
             tensor_info (TensorInfo, optional): Tensor information.
-            input_data (ndarray):   Numpy array. The numpy array will be transformed to a
+            input_data (ndarray):   The numpy array will be transformed to a
                                     buffer according to type returned by `TensorInfo.GetDataType`.
                                     Input data values type must correspond to data type returned by
                                     `TensorInfo.GetDataType`.
@@ -122,7 +128,7 @@ class ConstTensor(AnnConstTensor):
                 "ConstTensor requires {} bytes, {} provided. "
                 "Is your input array data type ({}) aligned with TensorInfo?".format(num_bytes, size_in_bytes,
                                                                                      data.dtype))
-        elif elements != num_elements:
+        if elements != num_elements:
             raise ValueError("ConstTensor requires {} elements, {} provided.".format(num_elements, elements))
 
     def __create_memory_area(self, data_type: int, num_bytes: int, num_elements: int, data: np.ndarray):
@@ -136,16 +142,22 @@ class ConstTensor(AnnConstTensor):
             data (ndarray): Input data as numpy array.
 
         """
-        np_data_type_mapping = {DataType_QuantisedAsymm8: np.uint8,
+        np_data_type_mapping = {DataType_QAsymmU8: np.uint8,
+                                DataType_QAsymmS8: np.int8,
+                                DataType_QSymmS8: np.int8,
                                 DataType_Float32: np.float32,
-                                DataType_QuantisedSymm16: np.int16,
+                                DataType_QSymmS16: np.int16,
                                 DataType_Signed32: np.int32,
                                 DataType_Float16: np.float16}
 
         if data_type not in np_data_type_mapping:
             raise ValueError("The data type provided for this Tensor is not supported: {}".format(data_type))
 
+        if np_data_type_mapping[data_type] != data.dtype:
+            raise TypeError("Expected data to have type {} for type {} but instead got numpy.{}".format(np_data_type_mapping[data_type], data_type, data.dtype))
+
         self.__check_size(data, num_bytes, num_elements)
+
         self.__memory_area = data
         self.__memory_area.flags.writeable = False
 

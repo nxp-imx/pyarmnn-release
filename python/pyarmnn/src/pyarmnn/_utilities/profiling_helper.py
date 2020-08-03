@@ -1,5 +1,8 @@
-# Copyright © 2019 Arm Ltd. All rights reserved.
+# Copyright © 2020 Arm Ltd. All rights reserved.
 # SPDX-License-Identifier: MIT
+"""
+This file contains functions relating to the use of the Arm NN profiler within PyArmNN.
+"""
 import json
 from collections import namedtuple
 
@@ -9,31 +12,31 @@ ProfilerData.__doc__ = """Container to hold the profiling inference data, and th
 Contains:
     inference_data (dict): holds end-to-end inference performance data. Keys:
                            'time_unit' - timer units.
-                           'execution_time' - list of total inference execution times for each inference run.                            
+                           'execution_time' - list of total inference execution times for each inference run.
     per_workload_execution_data (dict): holds per operation performance data, key is a operation name
                                         Each operation has 
                                         'time_unit' - timer units.   
                                         'execution_time' - list of total execution times for each inference run.
                                         'backend' - backend used for this operation.
-                                        
-Example:
-    
+
+Examples:
+
     >>> data = get_profiling_data(profiler)
     >>> print(data)
-    >>> ProfilerData(inference_data={'time_unit': 'us', 
-                                     'execution_time': [8901372.972]}, 
-                    per_workload_execution_data={'CopyMemGeneric_Execute_#3': {'time_unit': 'us', 
-                                                                               'execution_time': [28.941], 
-                                                                               'backend': 'Unknown'}, 
-                                                 'RefConvolution2dWorkload_Execute_#5': {'time_unit': 'us', 
-                                                                                         'execution_time': [126838.071], 
-                                                                                         'backend': 'CpuRef'}, 
-                                                 'RefDepthwiseConvolution2dWorkload_Execute_#6': {'time_unit': 'us', 
-                                                                                                  'execution_time': [49886.208], 
+    >>> ProfilerData(inference_data={'time_unit': 'us',
+                                     'execution_time': [8901372.972]},
+                    per_workload_execution_data={'CopyMemGeneric_Execute_#3': {'time_unit': 'us',
+                                                                               'execution_time': [28.941],
+                                                                               'backend': 'Unknown'},
+                                                 'RefConvolution2dWorkload_Execute_#5': {'time_unit': 'us',
+                                                                                         'execution_time': [126838.071],
+                                                                                         'backend': 'CpuRef'},
+                                                 'RefDepthwiseConvolution2dWorkload_Execute_#6': {'time_unit': 'us',
+                                                                                                  'execution_time': [49886.208],
                                                                                                   'backend': 'CpuRef'}
                                                  ...etc
                                                  }
-                    )  
+                    )
 """
 
 
@@ -42,7 +45,7 @@ def get_profiling_data(profiler: 'IProfiler') -> ProfilerData:
         and returns it in a ProfilerData container.
 
         Args:
-            profile_log (IProfiler): The IProfiler object to be parsed.
+            profiler (IProfiler): The IProfiler object to be parsed.
 
         Returns:
             ProfilerData: A container containing the relevant data extracted from the Profiler output.
@@ -88,8 +91,7 @@ def __get_backend(exec_key):
         return "CpuAcc"
     elif "cl" in exec_key.lower():
         return "GpuAcc"
-    elif "npu" in exec_key.lower():
-        return "NpuAcc"
+    elif "ethos" in exec_key.lower():
+        return "EthosNAcc"
     else:
         return "Unknown"
-

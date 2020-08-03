@@ -1,6 +1,5 @@
 //
-// Copyright © 2017 Arm Ltd. All rights reserved.
-// Copyright 2020 NXP
+// Copyright © 2020 Arm Ltd. All rights reserved.
 // SPDX-License-Identifier: MIT
 //
 %{
@@ -20,8 +19,8 @@ namespace armnn
 Struct for holding options relating to the Arm NN optimizer. See `Optimize`.
 
 Contains:
-    m_debug (bool): ...
-    m_ReduceFp32ToFp16 (bool): ...
+    m_debug (bool): Add debug data for easier troubleshooting.
+    m_ReduceFp32ToFp16 (bool): Reduce Fp32 data to Fp16 for faster processing.
 
 ") OptimizerOptions;
 struct OptimizerOptions
@@ -350,6 +349,21 @@ public:
 
     %feature("docstring",
         "
+        Adds an ArgMinMax layer to the network.
+
+        Args:
+            desc (ArgMinMaxDescriptor): Parameters for the ArgMinMax layer.
+            name (str): Optional name for the layer.
+
+        Returns:
+            IConnectableLayer: Interface for configuring the layer.
+        ") AddArgMinMaxLayer;
+    armnn::IConnectableLayer* AddArgMinMaxLayer(const armnn::ArgMinMaxDescriptor& desc,
+                                                 const char* name = nullptr);
+
+
+    %feature("docstring",
+        "
         Adds a Batch Normalization layer to the network.
 
         Args:
@@ -386,6 +400,20 @@ public:
 
     %feature("docstring",
         "
+        Adds a Comparison layer to the network.
+
+        Args:
+            comparisonDescriptor (ComparisonDescriptor): Configuration parameters for the layer.
+            name (str): Optional name for the layer.
+
+        Returns:
+            IConnectableLayer: Interface for configuring the layer.
+        ") AddComparisonLayer;
+    armnn::IConnectableLayer* AddComparisonLayer(const armnn::ComparisonDescriptor& comparisonDescriptor,
+                                                 const char* name = nullptr);
+
+    %feature("docstring",
+        "
         Adds a Concatenation layer to the network.
 
         Args:
@@ -414,6 +442,20 @@ public:
         ") AddConstantLayer;
     armnn::IConnectableLayer* AddConstantLayer(const armnn::ConstTensor& input,
                                                 const char* name = nullptr);
+
+    %feature("docstring",
+        "
+        Adds a Depth To Space layer to the network.
+
+        Args:
+            depthToSpaceDescriptor (DepthToSpaceDescriptor): Parameters for the depth to space operation.
+            name (str): Optional name for the layer.
+
+        Returns:
+            IConnectableLayer: Interface for configuring the layer.
+        ") AddDepthToSpaceLayer;
+    armnn::IConnectableLayer* AddDepthToSpaceLayer(const armnn::DepthToSpaceDescriptor& depthToSpaceDescriptor,
+                                                    const char* name = nullptr);
 
     %feature("docstring",
         "
@@ -459,6 +501,20 @@ public:
     armnn::IConnectableLayer* AddDivisionLayer(const char* name = nullptr);
 
     %feature("docstring",
+    "
+    Adds an Elementwise Unary layer to the network. Type of unary operation to use is decided by elementwiseUnaryDescriptor. Unary operations supported are (Abs, Exp, Neg, Rsqrt, Sqrt)
+
+    Args:
+        elementwiseUnaryDescriptor (ElementwiseUnaryDescriptor): ElementwiseUnaryDescriptor to configure the choice of unary operation added to the network.
+        name (str): Optional name for the layer.
+
+    Returns:
+        IConnectableLayer: Interface for configuring the layer.
+    ") AddElementwiseUnaryLayer;
+    armnn::IConnectableLayer* AddElementwiseUnaryLayer(const ElementwiseUnaryDescriptor& elementwiseUnaryDescriptor,
+                                                       const char* name = nullptr);
+
+    %feature("docstring",
         "
         Adds a Floor layer to the network.
 
@@ -481,6 +537,34 @@ public:
             IConnectableLayer: Interface for configuring the layer.
         ") AddGatherLayer;
     armnn::IConnectableLayer* AddGatherLayer(const char* name = nullptr);
+
+    %feature("docstring",
+        "
+        Adds an Instance Normalization layer to the network.
+
+        Args:
+            desc (InstanceNormalizationDescriptor): Parameters for the instance normalization operation.
+            name (str): Optional name for the layer.
+
+        Returns:
+            IConnectableLayer: Interface for configuring the layer.
+        ") AddInstanceNormalizationLayer;
+    armnn::IConnectableLayer* AddInstanceNormalizationLayer(const armnn::InstanceNormalizationDescriptor& desc,
+                                                             const char* name = nullptr);
+
+   %feature("docstring",
+        "
+        Adds a Log Softmax layer to the network.
+
+        Args:
+            desc (SoftmaxDescriptor): parameters to configure the log softmax.
+            name (str): Optional name for the layer.
+
+        Returns:
+            IConnectableLayer: Interface for configuring the layer.
+        ") AddLogSoftmaxLayer;
+    armnn::IConnectableLayer* AddLogSoftmaxLayer(const armnn::LogSoftmaxDescriptor& logSoftmaxDescriptor,
+                                                  const char* name = nullptr);
 
    %feature("docstring",
         "
@@ -659,7 +743,7 @@ public:
         Adds a Quantized Long Short-Term Memory layer to the network.
 
         Args:
-            params (QuantizedLstmInputParams): The weights and biases for the Quantized LSTM cell.
+            params (`QuantizedLstmInputParams`): The weights and biases for the Quantized LSTM cell.
             name (str): Optional name for the layer.
 
         Returns:
@@ -696,18 +780,20 @@ public:
     armnn::IConnectableLayer* AddResizeLayer(const armnn::ResizeDescriptor& resizeDescriptor,
                                               const char* name = nullptr);
 
+
     %feature("docstring",
         "
-        Adds Reciprocal of square root layer to the network.
+        Adds a Slice layer to the network.
 
         Args:
+            sliceDescriptor (SliceDescriptor): Descriptor to configure the slice operation.
             name (str): Optional name for the layer.
 
         Returns:
             IConnectableLayer: Interface for configuring the layer.
-        ") AddRsqrtLayer;
-    armnn::IConnectableLayer* AddRsqrtLayer(const char* name = nullptr);
-
+        ") AddSliceLayer;
+    armnn::IConnectableLayer* AddSliceLayer(const armnn::SliceDescriptor& sliceDescriptor,
+                                            const char* name = nullptr);
 
     %feature("docstring",
         "
@@ -724,7 +810,7 @@ public:
             IConnectableLayer: Interface for configuring the layer.
         ") AddSoftmaxLayer;
     armnn::IConnectableLayer* AddSoftmaxLayer(const armnn::SoftmaxDescriptor& softmaxDescriptor,
-                                              const char* name = nullptr);
+        const char* name = nullptr);
 
     %feature("docstring",
         "
@@ -781,6 +867,20 @@ public:
         ") AddStackLayer;
     armnn::IConnectableLayer* AddStackLayer(const armnn::StackDescriptor& descriptor,
                                              const char* name = nullptr);
+
+    %feature("docstring",
+        "
+        Adds a StandIn layer to the network.
+
+        Args:
+            descriptor (StandInDescriptor): Parameters to configure the standIn layer.
+            name (str): Optional name for the layer.
+
+        Returns:
+            IConnectableLayer: Interface for configuring the layer.
+        ") AddStandInLayer;
+    armnn::IConnectableLayer* AddStandInLayer(const armnn::StandInDescriptor& descriptor,
+                                              const char* name = nullptr);
 
     %feature("docstring",
         "
@@ -969,6 +1069,7 @@ class IOptimizedNetwork
 %extend IOptimizedNetwork {
 
     ~IOptimizedNetwork() {
+        armnn::IOptimizedNetwork::Destroy($self);
     }
 
     %feature("docstring",
@@ -1026,7 +1127,16 @@ class IOptimizedNetwork
 
 %feature("docstring",
     "
-    Create an optimized version of the given network.
+    Create an optimized version of the given network. Should be called before loading a network into the runtime.
+
+    Examples:
+        Optimize a loaded network ready for inference.
+        >>> parser = ann.ITfLiteParser()
+        >>> network = parser.CreateNetworkFromBinaryFile('./model.tflite')
+        >>>
+        >>> preferredBackends = [ann.BackendId('CpuAcc'), ann.BackendId('CpuRef')]
+        >>> opt_network, messages = ann.Optimize(network, preferredBackends, runtime.GetDeviceSpec(), ann.OptimizerOptions())
+
     Args:
         network (INetwork): INetwork description of the network to be optimized.
         backendPreferences (list): The choice of the backend ordered by user preferences. See `BackendId`.
