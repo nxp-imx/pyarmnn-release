@@ -38,7 +38,7 @@ def run_inference(runtime, net_id, images, labels, input_binding_info, output_bi
         runtime.EnqueueWorkload(net_id, input_tensors, output_tensors)
 
         # Process output
-        out_tensor = ann.workload_tensors_to_ndarray(output_tensors)[0]
+        out_tensor = ann.workload_tensors_to_ndarray(output_tensors)[0][0]
         results = np.argsort(out_tensor)[::-1]
         print_top_n(5, results, labels, out_tensor)
 
