@@ -1,6 +1,5 @@
-# Copyright © 2019 Arm Ltd. All rights reserved.
+# Copyright © 2020 Arm Ltd. All rights reserved.
 # SPDX-License-Identifier: MIT
-
 from copy import copy
 
 import pytest
@@ -14,7 +13,9 @@ def __get_tensor_info(dt):
     return tensor_info
 
 
-@pytest.mark.parametrize("dt", [ann.DataType_Float32, ann.DataType_Float16, ann.DataType_QuantisedAsymm8])
+@pytest.mark.parametrize("dt", [ann.DataType_Float32, ann.DataType_Float16,
+                                ann.DataType_QAsymmU8, ann.DataType_QSymmS8,
+                                ann.DataType_QAsymmS8])
 def test_create_tensor_with_info(dt):
     tensor_info = __get_tensor_info(dt)
     elements = tensor_info.GetNumElements()
@@ -49,7 +50,9 @@ def test_tensor_memory_output(dt):
     assert 4 == tensor.get_memory_area().itemsize, "it is float32"
 
 
-@pytest.mark.parametrize("dt", [ann.DataType_Float32, ann.DataType_Float16, ann.DataType_QuantisedAsymm8])
+@pytest.mark.parametrize("dt", [ann.DataType_Float32, ann.DataType_Float16,
+                                ann.DataType_QAsymmU8, ann.DataType_QSymmS8,
+                                ann.DataType_QAsymmS8])
 def test_tensor__str__(dt):
     tensor_info = __get_tensor_info(dt)
     elements = tensor_info.GetNumElements()
@@ -71,7 +74,9 @@ def test_create_empty_tensor():
     assert tensor.get_memory_area() is None
 
 
-@pytest.mark.parametrize("dt", [ann.DataType_Float32, ann.DataType_Float16, ann.DataType_QuantisedAsymm8])
+@pytest.mark.parametrize("dt", [ann.DataType_Float32, ann.DataType_Float16,
+                                ann.DataType_QAsymmU8, ann.DataType_QSymmS8,
+                                ann.DataType_QAsymmS8])
 def test_create_tensor_from_tensor(dt):
     tensor_info = __get_tensor_info(dt)
     tensor = ann.Tensor(tensor_info)
@@ -79,26 +84,30 @@ def test_create_tensor_from_tensor(dt):
 
     assert copied_tensor != tensor, "Different objects"
     assert copied_tensor.GetInfo() != tensor.GetInfo(), "Different objects"
-    np.testing.assert_array_equal(copied_tensor.get_memory_area(), tensor.get_memory_area()), "Same memory area"
+    assert copied_tensor.get_memory_area().ctypes.data == tensor.get_memory_area().ctypes.data,  "Same memory area"
     assert copied_tensor.GetNumElements() == tensor.GetNumElements()
     assert copied_tensor.GetNumBytes() == tensor.GetNumBytes()
     assert copied_tensor.GetDataType() == tensor.GetDataType()
 
 
-@pytest.mark.parametrize("dt", [ann.DataType_Float32, ann.DataType_Float16, ann.DataType_QuantisedAsymm8])
+@pytest.mark.parametrize("dt", [ann.DataType_Float32, ann.DataType_Float16,
+                                ann.DataType_QAsymmU8, ann.DataType_QSymmS8,
+                                ann.DataType_QAsymmS8])
 def test_copy_tensor(dt):
     tensor = ann.Tensor(__get_tensor_info(dt))
     copied_tensor = copy(tensor)
 
     assert copied_tensor != tensor, "Different objects"
     assert copied_tensor.GetInfo() != tensor.GetInfo(), "Different objects"
-    np.testing.assert_array_equal(copied_tensor.get_memory_area(), tensor.get_memory_area()), "Same memory area"
+    assert copied_tensor.get_memory_area().ctypes.data == tensor.get_memory_area().ctypes.data,  "Same memory area"
     assert copied_tensor.GetNumElements() == tensor.GetNumElements()
     assert copied_tensor.GetNumBytes() == tensor.GetNumBytes()
     assert copied_tensor.GetDataType() == tensor.GetDataType()
 
 
-@pytest.mark.parametrize("dt", [ann.DataType_Float32, ann.DataType_Float16, ann.DataType_QuantisedAsymm8])
+@pytest.mark.parametrize("dt", [ann.DataType_Float32, ann.DataType_Float16,
+                                ann.DataType_QAsymmU8, ann.DataType_QSymmS8,
+                                ann.DataType_QAsymmS8])
 def test_copied_tensor_has_memory_area_access_after_deletion_of_original_tensor(dt):
 
     tensor = ann.Tensor(__get_tensor_info(dt))

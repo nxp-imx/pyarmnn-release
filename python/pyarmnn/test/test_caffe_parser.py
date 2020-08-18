@@ -62,7 +62,7 @@ def test_get_network_output_binding_info(parser):
     assert tensor1.GetNumDimensions() == 2
     assert tensor1.GetNumElements() == 10
 
-@pytest.mark.skip("Skipped.")
+
 def test_filenotfound_exception(shared_data_folder):
     parser = ann.ICaffeParser()
 

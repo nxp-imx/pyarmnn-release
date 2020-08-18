@@ -1,13 +1,11 @@
 # Copyright © 2020 Arm Ltd. All rights reserved.
-# Copyright 2020 NXP
 # SPDX-License-Identifier: MIT
 import os
 
 import pytest
 import numpy as np
-from PIL import Image
+
 import pyarmnn as ann
-import platform
 
 
 @pytest.fixture(scope="function")
@@ -16,7 +14,6 @@ def random_runtime(shared_data_folder):
     network = parser.CreateNetworkFromBinaryFile(os.path.join(shared_data_folder, 'mock_model.tflite'))
     preferred_backends = [ann.BackendId('CpuRef')]
     options = ann.CreationOptions()
-
     runtime = ann.IRuntime(options)
 
     graphs_count = parser.GetSubgraphCount()
@@ -87,13 +84,12 @@ def mock_model_runtime(shared_data_folder):
     yield runtime, net_id, input_tensors, output_tensors
 
 
-@pytest.mark.skip(reason="IOptimizedNetwork dtor caused segfault, thus was replaced by default. We need to look into why.")
 def test_python_disowns_network(random_runtime):
     preferred_backends = random_runtime[0]
     network = random_runtime[1]
     runtime = random_runtime[2]
     opt_network, _ = ann.Optimize(network, preferred_backends,
-                                                      runtime.GetDeviceSpec(), ann.OptimizerOptions())
+                                  runtime.GetDeviceSpec(), ann.OptimizerOptions())
 
     runtime.LoadNetwork(opt_network)
 
@@ -106,9 +102,23 @@ def test_load_network(random_runtime):
     runtime = random_runtime[2]
 
     opt_network, _ = ann.Optimize(network, preferred_backends,
-                                                      runtime.GetDeviceSpec(), ann.OptimizerOptions())
+                                  runtime.GetDeviceSpec(), ann.OptimizerOptions())
 
     net_id, messages = runtime.LoadNetwork(opt_network)
+    assert "" == messages
+    assert net_id == 0
+
+
+def test_load_network_properties_provided(random_runtime):
+    preferred_backends = random_runtime[0]
+    network = random_runtime[1]
+    runtime = random_runtime[2]
+
+    opt_network, _ = ann.Optimize(network, preferred_backends,
+                                  runtime.GetDeviceSpec(), ann.OptimizerOptions())
+
+    properties = ann.INetworkProperties(True, True)
+    net_id, messages = runtime.LoadNetwork(opt_network, properties)
     assert "" == messages
     assert net_id == 0
 
@@ -135,7 +145,7 @@ def test_enqueue_workload(random_runtime):
     output_tensors = random_runtime[4]
 
     opt_network, _ = ann.Optimize(network, preferred_backends,
-                                                      runtime.GetDeviceSpec(), ann.OptimizerOptions())
+                                  runtime.GetDeviceSpec(), ann.OptimizerOptions())
 
     net_id, _ = runtime.LoadNetwork(opt_network)
     runtime.EnqueueWorkload(net_id, input_tensors, output_tensors)
@@ -149,7 +159,7 @@ def test_enqueue_workload_fails_with_empty_input_tensors(random_runtime):
     output_tensors = random_runtime[4]
 
     opt_network, _ = ann.Optimize(network, preferred_backends,
-                                                      runtime.GetDeviceSpec(), ann.OptimizerOptions())
+                                  runtime.GetDeviceSpec(), ann.OptimizerOptions())
 
     net_id, _ = runtime.LoadNetwork(opt_network)
     with pytest.raises(RuntimeError) as err:

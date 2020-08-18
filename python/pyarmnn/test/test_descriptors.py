@@ -1,5 +1,4 @@
-# Copyright © 2019 Arm Ltd. All rights reserved.
-# Copyright 2020 NXP
+# Copyright © 2020 Arm Ltd. All rights reserved.
 # SPDX-License-Identifier: MIT
 import inspect
 
@@ -15,6 +14,12 @@ def test_activation_descriptor_default_values():
     assert desc.m_Function == ann.ActivationFunction_Sigmoid
     assert desc.m_A == 0
     assert desc.m_B == 0
+
+
+def test_argminmax_descriptor_default_values():
+    desc = ann.ArgMinMaxDescriptor()
+    assert desc.m_Function == ann.ArgMinMaxFunction_Min
+    assert desc.m_Axis == -1
 
 
 def test_batchnormalization_descriptor_default_values():
@@ -97,6 +102,12 @@ def test_convolution2d_descriptor_default_values():
     assert desc.m_DataLayout == ann.DataLayout_NCHW
 
 
+def test_depthtospace_descriptor_default_values():
+    desc = ann.DepthToSpaceDescriptor()
+    assert desc.m_BlockSize == 1
+    assert desc.m_DataLayout == ann.DataLayout_NHWC
+
+
 def test_depthwise_convolution2d_descriptor_default_values():
     desc = ann.DepthwiseConvolution2dDescriptor()
     assert desc.m_PadLeft == 0
@@ -136,6 +147,14 @@ def test_fully_connected_descriptor_default_values():
     desc = ann.FullyConnectedDescriptor()
     assert desc.m_BiasEnabled == False
     assert desc.m_TransposeWeightMatrix == False
+
+
+def test_instancenormalization_descriptor_default_values():
+    desc = ann.InstanceNormalizationDescriptor()
+    assert desc.m_Gamma == 1
+    assert desc.m_Beta == 0
+    assert desc.m_DataLayout == ann.DataLayout_NCHW
+    np.allclose(1e-12, desc.m_Eps)
 
 
 def test_lstm_descriptor_default_values():
@@ -237,12 +256,21 @@ def test_reshape_descriptor_default_values():
     assert desc.m_TargetShape.GetNumDimensions() == 0
 
 
+def test_slice_descriptor_default_values():
+    desc = ann.SliceDescriptor()
+    assert desc.m_TargetWidth == 0
+    assert desc.m_TargetHeight == 0
+    assert desc.m_Method == ann.ResizeMethod_NearestNeighbor
+    assert desc.m_DataLayout == ann.DataLayout_NCHW
+
+
 def test_resize_descriptor_default_values():
     desc = ann.ResizeDescriptor()
     assert desc.m_TargetWidth == 0
     assert desc.m_TargetHeight == 0
     assert desc.m_Method == ann.ResizeMethod_NearestNeighbor
     assert desc.m_DataLayout == ann.DataLayout_NCHW
+    assert desc.m_BilinearAlignCorners == False
 
 
 def test_spacetobatchnd_descriptor_default_values():
@@ -262,6 +290,22 @@ def test_stack_descriptor_default_values():
     assert desc.m_NumInputs == 0
     # check the empty Inputshape
     assert desc.m_InputShape.GetNumDimensions() == 0
+
+
+def test_slice_descriptor_default_values():
+    desc = ann.SliceDescriptor()
+    desc.m_Begin = [1, 2, 3, 4, 5]
+    desc.m_Size = (1, 2, 3, 4)
+
+    assert [1, 2, 3, 4, 5] == desc.m_Begin
+    assert [1, 2, 3, 4] == desc.m_Size
+
+
+def test_slice_descriptor_ctor():
+    desc = ann.SliceDescriptor([1, 2, 3, 4, 5], (1, 2, 3, 4))
+
+    assert [1, 2, 3, 4, 5] == desc.m_Begin
+    assert [1, 2, 3, 4] == desc.m_Size
 
 
 def test_strided_slice_descriptor_default_values():
@@ -343,6 +387,11 @@ def test_view_descriptor_default_values():
     assert 0 == desc.GetNumDimensions()
 
 
+def test_elementwise_unary_descriptor_default_values():
+    desc = ann.ElementwiseUnaryDescriptor()
+    assert desc.m_Operation == ann.UnaryOperation_Abs
+
+
 def test_view_descriptor_incorrect_input():
     desc = ann.SplitterDescriptor(2, 3)
     with pytest.raises(RuntimeError) as err:
@@ -404,6 +453,7 @@ def test_createdescriptorforconcatenation_rubbish_assignment_shape_vector(input_
 generated_classes = inspect.getmembers(generated, inspect.isclass)
 generated_classes_names = list(map(lambda x: x[0], generated_classes))
 @pytest.mark.parametrize("desc_name", ['ActivationDescriptor',
+                                       'ArgMinMaxDescriptor',
                                        'PermuteDescriptor',
                                        'SoftmaxDescriptor',
                                        'ConcatDescriptor',
@@ -416,6 +466,7 @@ generated_classes_names = list(map(lambda x: x[0], generated_classes))
                                        'NormalizationDescriptor',
                                        'L2NormalizationDescriptor',
                                        'BatchNormalizationDescriptor',
+                                       'InstanceNormalizationDescriptor',
                                        'BatchToSpaceNdDescriptor',
                                        'FakeQuantizationDescriptor',
                                        'ResizeDescriptor',
@@ -425,16 +476,60 @@ generated_classes_names = list(map(lambda x: x[0], generated_classes))
                                        'LstmDescriptor',
                                        'MeanDescriptor',
                                        'PadDescriptor',
+                                       'SliceDescriptor',
                                        'StackDescriptor',
                                        'StridedSliceDescriptor',
-                                       'TransposeConvolution2dDescriptor'])
+                                       'TransposeConvolution2dDescriptor',
+                                       'ElementwiseUnaryDescriptor'])
 class TestDescriptorMassChecks:
 
     def test_desc_implemented(self, desc_name):
         assert desc_name in generated_classes_names
 
-    @pytest.mark.skip(reason="test operator== overload which is implemented as of 19.11")
     def test_desc_equal(self, desc_name):
-        desc_class = next(filter(lambda x: x[0] == desc_name ,generated_classes))[1]
+        desc_class = next(filter(lambda x: x[0] == desc_name, generated_classes))[1]
 
         assert desc_class() == desc_class()
+
+
+generated_classes = inspect.getmembers(generated, inspect.isclass)
+generated_classes_names = list(map(lambda x: x[0], generated_classes))
+@pytest.mark.parametrize("desc_name", ['ActivationDescriptor',
+                                       'ArgMinMaxDescriptor',
+                                       'PermuteDescriptor',
+                                       'SoftmaxDescriptor',
+                                       'ConcatDescriptor',
+                                       'SplitterDescriptor',
+                                       'Pooling2dDescriptor',
+                                       'FullyConnectedDescriptor',
+                                       'Convolution2dDescriptor',
+                                       'DepthwiseConvolution2dDescriptor',
+                                       'DetectionPostProcessDescriptor',
+                                       'NormalizationDescriptor',
+                                       'L2NormalizationDescriptor',
+                                       'BatchNormalizationDescriptor',
+                                       'InstanceNormalizationDescriptor',
+                                       'BatchToSpaceNdDescriptor',
+                                       'FakeQuantizationDescriptor',
+                                       'ResizeDescriptor',
+                                       'ReshapeDescriptor',
+                                       'SpaceToBatchNdDescriptor',
+                                       'SpaceToDepthDescriptor',
+                                       'LstmDescriptor',
+                                       'MeanDescriptor',
+                                       'PadDescriptor',
+                                       'SliceDescriptor',
+                                       'StackDescriptor',
+                                       'StridedSliceDescriptor',
+                                       'TransposeConvolution2dDescriptor',
+                                       'ElementwiseUnaryDescriptor'])
+class TestDescriptorMassChecks:
+
+    def test_desc_implemented(self, desc_name):
+        assert desc_name in generated_classes_names
+
+    def test_desc_equal(self, desc_name):
+        desc_class = next(filter(lambda x: x[0] == desc_name, generated_classes))[1]
+
+        assert desc_class() == desc_class()
+
