@@ -136,7 +136,7 @@ gcc --print-search-dirs
 ```
 Install PyArmNN from binary by pointing to the wheel file:
 ```bash
-pip install dist/pyarmnn-19.8.1-cp37-cp37m-linux_aarch64.whl
+pip install dist/pyarmnn-20.2.0-cp37-cp37m-linux_aarch64.whl
 ```
 
 ## Installing from the source package
