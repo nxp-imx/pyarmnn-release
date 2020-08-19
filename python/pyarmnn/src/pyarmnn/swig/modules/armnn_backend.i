@@ -1,8 +1,7 @@
 //
-// Copyright © 2017 Arm Ltd. All rights reserved.
+// Copyright © 2020 Arm Ltd. All rights reserved.
 // SPDX-License-Identifier: MIT
 //
-
 %{
 #include "armnn/BackendId.hpp"
 %}
@@ -21,7 +20,7 @@ public:
     %feature("docstring",
         "
         Creates backend id instance.
-        Supported backend ids: 'CpuRef', 'CpuAcc', 'GpuAcc', 'NpuAcc'.
+        Supported backend ids: 'CpuRef', 'CpuAcc', 'GpuAcc', 'EthosNAcc'.
 
         Args:
             id (str): Computation backend identification.

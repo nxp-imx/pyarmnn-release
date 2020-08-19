@@ -1,5 +1,5 @@
 //
-// Copyright © 2017 Arm Ltd. All rights reserved.
+// Copyright © 2020 Arm Ltd. All rights reserved.
 // SPDX-License-Identifier: MIT
 //
 %{
@@ -16,9 +16,29 @@ namespace armnn
 "
 Class for holding the shape information of an Arm NN tensor.
 
+This class is iterable. You can iterate over it to get each value of the Tensor shape.
+
+Examples:
+    Obtain tensor shape information as a list.
+    >>> import pyarmnn as ann
+    >>> import numpy as np
+    >>>
+    >>> tensor_info = ann.TensorInfo(ann.TensorShape((4, 2, 1, 3)), ann.DataType_Float32)
+    >>> tensor = ann.ConstTensor(tensor_info, np.ones([4, 2, 1, 3], dtype=np.float32))
+    >>> print(list(tensor.GetShape()))
+    [4, 2, 1, 3]
+
 ") TensorShape;
 class TensorShape
 {
+    // Make TensorShape iterable so we can return shape dims easily.
+    %pythoncode %{
+    def __iter__(self):
+        for dim in range(self.GetNumDimensions()):
+            yield self[dim]
+    %}
+
+
 public:
     %tensor_shape_typemap(unsigned int numDimensions, const unsigned int* dimensionSizes);
     TensorShape(unsigned int numDimensions, const unsigned int* dimensionSizes);

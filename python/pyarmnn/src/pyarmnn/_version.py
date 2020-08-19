@@ -1,9 +1,9 @@
-# Copyright © 2019 Arm Ltd. All rights reserved.
+# Copyright © 2020 Arm Ltd. All rights reserved.
 # Copyright 2020 NXP
 # SPDX-License-Identifier: MIT
 import os
 
-version_info = (19, 8, 1)
+version_info = (20, 2, 0)
 
 __dev_version_env = os.getenv("PYARMNN_DEV_VER", "")
 

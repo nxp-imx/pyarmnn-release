@@ -1,6 +1,5 @@
 //
-// Copyright © 2017 Arm Ltd. All rights reserved.
-// Copyright 2020 NXP
+// Copyright © 2020 Arm Ltd. All rights reserved.
 // SPDX-License-Identifier: MIT
 //
 %module pyarmnn_version
@@ -20,12 +19,12 @@
 
     std::string GetMajorVersion()
     {
-        return "19";
+        return STRINGIFY_VALUE(ARMNN_MAJOR_VERSION);
     };
 
     std::string GetMinorVersion()
     {
-        return "08";
+        return STRINGIFY_VALUE(ARMNN_MINOR_VERSION);
     };
 %}
 %feature("docstring",

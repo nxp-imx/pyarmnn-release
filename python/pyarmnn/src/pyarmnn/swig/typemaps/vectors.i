@@ -1,5 +1,5 @@
 //
-// Copyright © 2017 Arm Ltd. All rights reserved.
+// Copyright © 2020 Arm Ltd. All rights reserved.
 // SPDX-License-Identifier: MIT
 //
 %inline %{
@@ -152,7 +152,7 @@
     template<class T>
     int from_python_to_vector(PyObject* seq, std::vector<T>& out) {
         Py_ssize_t size = PySequence_Fast_GET_SIZE(seq);
-        
+
         for(Py_ssize_t i=0; i < size; i++) {
             PyObject *item = PySequence_Fast_GET_ITEM(seq, i);
             if(!item) {

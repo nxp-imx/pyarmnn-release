@@ -1,6 +1,5 @@
 //
-// Copyright © 2017 Arm Ltd. All rights reserved.
-// Copyright 2020 NXP
+// Copyright © 2020 Arm Ltd. All rights reserved.
 // SPDX-License-Identifier: MIT
 //
 %{
@@ -58,6 +57,24 @@ struct CreationOptions
 namespace armnn
 {
 
+struct INetworkProperties
+{
+    %feature("docstring",
+    "
+    Structure for holding network properties.
+
+    Contains:
+        m_ImportEnabled (bool): Enable import.
+
+        m_ExportEnabled (bool): Enable export.
+
+    ") INetworkProperties;
+    INetworkProperties(bool importEnabled = false, bool exportEnabled = false);
+
+    const bool m_ImportEnabled;
+    const bool m_ExportEnabled;
+};
+
 %feature("docstring",
 "
 Interface for runtime objects.
@@ -72,6 +89,7 @@ Args:
 class IRuntime
 {
 public:
+
     %ignore
     armnn::IRuntime::UnloadNetwork(NetworkId networkId);
 
@@ -125,27 +143,6 @@ public:
       }
     }
 
-    %typemap(in) armnn::IOptimizedNetwork*;
-    %feature("docstring",
-    "
-    Calling this function will perform an inference on your network.
-
-    Args:
-        networkId (int): Unique ID of the network to run.
-        inputTensors (list): A list of tuples (int, ConstTensor), see `make_input_tensors`.
-        outputTensors (list): A list of tuples (int, Tensor), see `make_output_tensors`.
-
-    ") EnqueueWorkload;
-    void EnqueueWorkload(int networkId, const std::vector<std::pair<int, armnn::ConstTensor>>& inputTensors,
-                         const std::vector<std::pair<int, armnn::Tensor>>& outputTensors) {
-        armnn::Status status = $self->EnqueueWorkload(networkId, inputTensors, outputTensors);
-
-        if(status == armnn::Status::Failure)
-        {
-            throw armnn::Exception("Failed to enqueue workload for network.");
-        }
-    };
-
     %feature("docstring",
         "
         Loads a complete network into the IRuntime.
@@ -158,12 +155,21 @@ public:
         Raises:
             RuntimeError: If process fails.
         ") LoadNetwork;
-    std::pair<int, std::string> LoadNetwork(armnn::IOptimizedNetwork* network)
+
+    std::pair<int, std::string> LoadNetwork(armnn::IOptimizedNetwork* network,
+                                            const INetworkProperties* networkProperties = nullptr)
     {
         armnn::IOptimizedNetworkPtr netPtr(network, &armnn::IOptimizedNetwork::Destroy);
         armnn::NetworkId networkIdOut;
         std::string errorString;
-        armnn::Status status = $self->LoadNetwork(networkIdOut, std::move(netPtr), errorString);
+        armnn::Status status;
+
+        if (networkProperties) {
+            status = $self->LoadNetwork(networkIdOut, std::move(netPtr), errorString, *networkProperties);
+        } else {
+            status = $self->LoadNetwork(networkIdOut, std::move(netPtr), errorString);
+        }
+
         if(status == armnn::Status::Failure)
         {
             throw armnn::Exception(errorString);
@@ -171,6 +177,27 @@ public:
 
         auto net_id_int = static_cast<int>(networkIdOut);
         return std::make_pair(net_id_int, errorString);
+    };
+
+    %typemap(in) armnn::IOptimizedNetwork*;
+    %feature("docstring",
+    "
+    Calling this function will perform an inference on your network.
+
+    Args:
+        networkId (int): Unique ID of the network to run.
+        inputTensors (list): A list of tuples (int, `ConstTensor`), see `make_input_tensors`.
+        outputTensors (list): A list of tuples (int, `Tensor`), see `make_output_tensors`.
+
+    ") EnqueueWorkload;
+    void EnqueueWorkload(int networkId, const std::vector<std::pair<int, armnn::ConstTensor>>& inputTensors,
+                         const std::vector<std::pair<int, armnn::Tensor>>& outputTensors) {
+        armnn::Status status = $self->EnqueueWorkload(networkId, inputTensors, outputTensors);
+
+        if(status == armnn::Status::Failure)
+        {
+            throw armnn::Exception("Failed to enqueue workload for network.");
+        }
     };
 
     %feature("docstring",
@@ -192,7 +219,7 @@ public:
     %feature("docstring",
     "
     Returns the IProfiler instance registered against the working thread, and stored on the loaded network.
-    Be aware that if the runtime has Unloaded the network, or if the runtime is destroyed,
+    Be aware that if the runtime has unloaded the network, or if the runtime is destroyed,
     that the IProfiler instance will also be destroyed, and will cause a segmentation fault.
 
     Args:
@@ -204,7 +231,7 @@ public:
     Raises:
         RuntimeError: If no profiler is found.
     ") GetProfiler;
-    
+
     armnn::IProfiler* GetProfiler(int networkId) {
         std::shared_ptr<armnn::IProfiler> profiler = $self->GetProfiler(networkId);
 	if (nullptr == profiler) {

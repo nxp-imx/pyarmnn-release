@@ -1,5 +1,5 @@
 //
-// Copyright © 2017 Arm Ltd. All rights reserved.
+// Copyright © 2020 Arm Ltd. All rights reserved.
 // SPDX-License-Identifier: MIT
 //
 %module pyarmnn_caffeparser
@@ -47,7 +47,7 @@ public:
 
     %feature("docstring",
     "
-    Retrieve binding info (layer id and tensor info) for the network output identified by the given layer name.
+    Retrieve binding info (layer id and `TensorInfo`) for the network output identified by the given layer name.
 
     Args:
         name (str): Name of the output.
