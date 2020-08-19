@@ -1,5 +1,4 @@
-# Copyright © 2019 Arm Ltd. All rights reserved.
-# Copyright 2020 NXP
+# Copyright © 2020 Arm Ltd. All rights reserved.
 # SPDX-License-Identifier: MIT
 import os
 import sys
@@ -8,7 +7,6 @@ import shutil
 import pytest
 
 sys.path.append(os.path.abspath('..'))
-sys.path.append(os.path.abspath(os.path.join('build', 'python', 'pyarmnn')))
 from setup import find_armnn, find_includes, linux_gcc_lib_search, check_armnn_version
 
 
@@ -48,7 +46,6 @@ def _setup_armnn(tmpdir):
     shutil.rmtree(libs)
 
 
-@pytest.mark.skip(reason="test_setup tests temporarily disabled, because setup.py is being generated from a template")
 def test_find_armnn(tmpdir):
     lib_names, lib_paths = find_armnn(lib_name='libarmnn*.so',
                                       armnn_libs_env="TEST_ARMNN_LIB",
@@ -60,7 +57,6 @@ def test_find_armnn(tmpdir):
     assert [os.path.join(tmpdir, 'include')] == armnn_includes
 
 
-@pytest.mark.skip(reason="test_setup tests temporarily disabled, because setup.py is being generated from a template")
 def test_find_armnn_default_path(tmpdir):
     lib_names, lib_paths = find_armnn(lib_name='libarmnn*.so',
                                       armnn_libs_env="RUBBISH_LIB",
@@ -71,7 +67,6 @@ def test_find_armnn_default_path(tmpdir):
     assert [os.path.join(tmpdir, 'include')] == armnn_includes
 
 
-@pytest.mark.skip(reason="test_setup tests temporarily disabled, because setup.py is being generated from a template")
 def test_not_find_armnn(tmpdir):
     with pytest.raises(RuntimeError) as err:
         find_armnn(lib_name='libarmnn*.so', armnn_libs_env="RUBBISH_LIB",
@@ -80,7 +75,6 @@ def test_not_find_armnn(tmpdir):
     assert 'ArmNN library libarmnn*.so was not found in (\'/lib\',)' in str(err.value)
 
 
-@pytest.mark.skip(reason="test_setup tests temporarily disabled, because setup.py is being generated from a template")
 @pytest.mark.parametrize("env", ["RUBBISH_INCLUDE", "EMPTY_ARMNN_INCLUDE"])
 def test_rubbish_armnn_include(tmpdir, env):
     includes = find_includes(armnn_include_env=env)

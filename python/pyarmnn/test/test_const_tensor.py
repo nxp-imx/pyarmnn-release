@@ -1,4 +1,4 @@
-# Copyright © 2019 Arm Ltd. All rights reserved.
+# Copyright © 2020 Arm Ltd. All rights reserved.
 # SPDX-License-Identifier: MIT
 import pytest
 import numpy as np
@@ -16,10 +16,12 @@ def _get_tensor_info(dt):
                          [
                              (ann.DataType_Float32, np.random.randint(1, size=(2, 4)).astype(np.float32)),
                              (ann.DataType_Float16, np.random.randint(1, size=(2, 4)).astype(np.float16)),
-                             (ann.DataType_QuantisedAsymm8, np.random.randint(1, size=(2, 4)).astype(np.uint8)),
+                             (ann.DataType_QAsymmU8, np.random.randint(1, size=(2, 4)).astype(np.uint8)),
+                             (ann.DataType_QAsymmS8, np.random.randint(1, size=(2, 4)).astype(np.int8)),
+                             (ann.DataType_QSymmS8, np.random.randint(1, size=(2, 4)).astype(np.int8)),
                              (ann.DataType_Signed32, np.random.randint(1, size=(2, 4)).astype(np.int32)),
-                             (ann.DataType_QuantisedSymm16, np.random.randint(1, size=(2, 4)).astype(np.int16))
-                         ], ids=['float32', 'float16', 'unsigned int8', 'int32', 'int16'])
+                             (ann.DataType_QSymmS16, np.random.randint(1, size=(2, 4)).astype(np.int16))
+                         ], ids=['float32', 'float16', 'unsigned int8', 'signed int8', 'signed int8', 'int32', 'int16'])
 def test_const_tensor_too_many_elements(dt, data):
     tensor_info = _get_tensor_info(dt)
     num_bytes = tensor_info.GetNumBytes()
@@ -34,10 +36,12 @@ def test_const_tensor_too_many_elements(dt, data):
                          [
                              (ann.DataType_Float32, np.random.randint(1, size=(2, 2)).astype(np.float32)),
                              (ann.DataType_Float16, np.random.randint(1, size=(2, 2)).astype(np.float16)),
-                             (ann.DataType_QuantisedAsymm8, np.random.randint(1, size=(2, 2)).astype(np.uint8)),
+                             (ann.DataType_QAsymmU8, np.random.randint(1, size=(2, 2)).astype(np.uint8)),
+                             (ann.DataType_QAsymmS8, np.random.randint(1, size=(2, 2)).astype(np.int8)),
+                             (ann.DataType_QSymmS8, np.random.randint(1, size=(2, 2)).astype(np.int8)),
                              (ann.DataType_Signed32, np.random.randint(1, size=(2, 2)).astype(np.int32)),
-                             (ann.DataType_QuantisedSymm16, np.random.randint(1, size=(2, 2)).astype(np.int16))
-                         ], ids=['float32', 'float16', 'unsigned int8', 'int32', 'int16'])
+                             (ann.DataType_QSymmS16, np.random.randint(1, size=(2, 2)).astype(np.int16))
+                         ], ids=['float32', 'float16', 'unsigned int8', 'signed int8', 'signed int8', 'int32', 'int16'])
 def test_const_tensor_too_little_elements(dt, data):
     tensor_info = _get_tensor_info(dt)
     num_bytes = tensor_info.GetNumBytes()
@@ -52,10 +56,12 @@ def test_const_tensor_too_little_elements(dt, data):
                          [
                              (ann.DataType_Float32, np.random.randint(1, size=(2, 2, 3, 3)).astype(np.float32)),
                              (ann.DataType_Float16, np.random.randint(1, size=(2, 2, 3, 3)).astype(np.float16)),
-                             (ann.DataType_QuantisedAsymm8, np.random.randint(1, size=(2, 2, 3, 3)).astype(np.uint8)),
+                             (ann.DataType_QAsymmU8, np.random.randint(1, size=(2, 2, 3, 3)).astype(np.uint8)),
+                             (ann.DataType_QAsymmS8, np.random.randint(1, size=(2, 2, 3, 3)).astype(np.int8)),
+                             (ann.DataType_QSymmS8, np.random.randint(1, size=(2, 2, 3, 3)).astype(np.int8)),
                              (ann.DataType_Signed32, np.random.randint(1, size=(2, 2, 3, 3)).astype(np.int32)),
-                             (ann.DataType_QuantisedSymm16, np.random.randint(1, size=(2, 2, 3, 3)).astype(np.int16))
-                         ], ids=['float32', 'float16', 'unsigned int8', 'int32', 'int16'])
+                             (ann.DataType_QSymmS16, np.random.randint(1, size=(2, 2, 3, 3)).astype(np.int16))
+                         ], ids=['float32', 'float16', 'unsigned int8', 'signed int8', 'signed int8', 'int32', 'int16'])
 def test_const_tensor_multi_dimensional_input(dt, data):
     tensor = ann.ConstTensor(ann.TensorInfo(ann.TensorShape((2, 2, 3, 3)), dt), data)
 
@@ -72,7 +78,7 @@ def test_create_const_tensor_from_tensor():
 
     assert copied_tensor != tensor, "Different objects"
     assert copied_tensor.GetInfo() != tensor.GetInfo(), "Different objects"
-    assert copied_tensor.get_memory_area().data == tensor.get_memory_area().data, "Same memory area"
+    assert copied_tensor.get_memory_area().ctypes.data == tensor.get_memory_area().ctypes.data, "Same memory area"
     assert copied_tensor.GetNumElements() == tensor.GetNumElements()
     assert copied_tensor.GetNumBytes() == tensor.GetNumBytes()
     assert copied_tensor.GetDataType() == tensor.GetDataType()
@@ -131,8 +137,10 @@ def test_const_tensor_unsupported_datatype(dt, data):
                          [
                              (ann.DataType_Float32, [[1, 1, 1], [1, 1, 1]]),
                              (ann.DataType_Float16, [[1, 1, 1], [1, 1, 1]]),
-                             (ann.DataType_QuantisedAsymm8, [[1, 1, 1], [1, 1, 1]])
-                         ], ids=['float32', 'float16', 'unsigned int8'])
+                             (ann.DataType_QAsymmU8, [[1, 1, 1], [1, 1, 1]]),
+                             (ann.DataType_QAsymmS8, [[1, 1, 1], [1, 1, 1]]),
+                             (ann.DataType_QSymmS8, [[1, 1, 1], [1, 1, 1]])
+                         ], ids=['float32', 'float16', 'unsigned int8', 'signed int8', 'signed int8'])
 def test_const_tensor_incorrect_input_datatype(dt, data):
     tensor_info = _get_tensor_info(dt)
 
@@ -146,10 +154,12 @@ def test_const_tensor_incorrect_input_datatype(dt, data):
                          [
                              (ann.DataType_Float32, np.random.randint(1, size=(2, 3)).astype(np.float32)),
                              (ann.DataType_Float16, np.random.randint(1, size=(2, 3)).astype(np.float16)),
-                             (ann.DataType_QuantisedAsymm8, np.random.randint(1, size=(2, 3)).astype(np.uint8)),
+                             (ann.DataType_QAsymmU8, np.random.randint(1, size=(2, 3)).astype(np.uint8)),
+                             (ann.DataType_QAsymmS8, np.random.randint(1, size=(2, 3)).astype(np.int8)),
+                             (ann.DataType_QSymmS8, np.random.randint(1, size=(2, 3)).astype(np.int8)),
                              (ann.DataType_Signed32, np.random.randint(1, size=(2, 3)).astype(np.int32)),
-                             (ann.DataType_QuantisedSymm16, np.random.randint(1, size=(2, 3)).astype(np.int16))
-                         ], ids=['float32', 'float16', 'unsigned int8', 'int32', 'int16'])
+                             (ann.DataType_QSymmS16, np.random.randint(1, size=(2, 3)).astype(np.int16))
+                         ], ids=['float32', 'float16', 'unsigned int8', 'signed int8', 'signed int8', 'int32', 'int16'])
 class TestNumpyDataTypes:
 
     def test_copy_const_tensor(self, dt, data):
@@ -173,7 +183,7 @@ class TestNumpyDataTypes:
         tensor = ann.ConstTensor(tensor_info, data)
 
         assert str(tensor) == "ConstTensor{{DataType: {}, NumBytes: {}, NumDimensions: " \
-                                   "{}, NumElements: {}}}".format(d_type, num_bytes, num_dimensions, num_elements)
+                              "{}, NumElements: {}}}".format(d_type, num_bytes, num_dimensions, num_elements)
 
     def test_const_tensor_with_info(self, dt, data):
         tensor_info = _get_tensor_info(dt)
@@ -197,3 +207,45 @@ class TestNumpyDataTypes:
             tensor.get_memory_area()[0] = 0
 
         assert 'is read-only' in str(err.value)
+
+    def test_numpy_dtype_matches_ann_dtype(self, dt, data):
+        np_data_type_mapping = {ann.DataType_QAsymmU8: np.uint8,
+                                ann.DataType_QAsymmS8: np.int8,
+                                ann.DataType_QSymmS8: np.int8,
+                                ann.DataType_Float32: np.float32,
+                                ann.DataType_QSymmS16: np.int16,
+                                ann.DataType_Signed32: np.int32,
+                                ann.DataType_Float16: np.float16}
+
+        tensor_info = _get_tensor_info(dt)
+        tensor = ann.ConstTensor(tensor_info, data)
+        assert np_data_type_mapping[tensor.GetDataType()] == data.dtype
+
+
+# This test checks that mismatched numpy and PyArmNN datatypes with same number of bits raises correct error.
+@pytest.mark.parametrize("dt, data",
+                         [
+                             (ann.DataType_Float32, np.random.randint(1, size=(2, 3)).astype(np.int32)),
+                             (ann.DataType_Float16, np.random.randint(1, size=(2, 3)).astype(np.int16)),
+                             (ann.DataType_QAsymmU8, np.random.randint(1, size=(2, 3)).astype(np.int8)),
+                             (ann.DataType_QAsymmS8, np.random.randint(1, size=(2, 3)).astype(np.uint8)),
+                             (ann.DataType_QSymmS8, np.random.randint(1, size=(2, 3)).astype(np.uint8)),
+                             (ann.DataType_Signed32, np.random.randint(1, size=(2, 3)).astype(np.float32)),
+                             (ann.DataType_QSymmS16, np.random.randint(1, size=(2, 3)).astype(np.float16))
+                         ], ids=['float32', 'float16', 'unsigned int8', 'signed int8', 'signed int8', 'int32', 'int16'])
+def test_numpy_dtype_mismatch_ann_dtype(dt, data):
+    np_data_type_mapping = {ann.DataType_QAsymmU8: np.uint8,
+                            ann.DataType_QAsymmS8: np.int8,
+                            ann.DataType_QSymmS8: np.int8,
+                            ann.DataType_Float32: np.float32,
+                            ann.DataType_QSymmS16: np.int16,
+                            ann.DataType_Signed32: np.int32,
+                            ann.DataType_Float16: np.float16}
+
+    tensor_info = _get_tensor_info(dt)
+    with pytest.raises(TypeError) as err:
+        ann.ConstTensor(tensor_info, data)
+
+    assert str(err.value) == "Expected data to have type {} for type {} but instead got numpy.{}".format(
+        np_data_type_mapping[dt], dt, data.dtype)
+

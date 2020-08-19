@@ -51,7 +51,13 @@ def test_inference_exec(mock_profiler):
                                                                    2, 2],
                                                                   'us',
                                                                   'GpuAcc',
-                                                                  'ClSomeMock3dWorkload_Execute_#7')
+                                                                  'ClSomeMock3dWorkload_Execute_#7'),
+                                                                 ([2, 2,
+                                                                   2, 2,
+                                                                   2, 2],
+                                                                  'us',
+                                                                  'EthosNAcc',
+                                                                  'EthosNSomeMock4dWorkload_Execute_#8')
                                                                  ])
 def test_profiler_workloads(mock_profiler, exec_times, unit, backend, workload):
     profiling_data_obj = ann.get_profiling_data(mock_profiler)

@@ -31,7 +31,6 @@ def test_onnx_parser_swig_destroy():
     assert ann.IOnnxParser.__swig_destroy__.__name__ == "delete_IOnnxParser"
 
 
-@pytest.mark.skip("Skipped.")
 def test_check_onnx_parser_swig_ownership(parser):
     # Check to see that SWIG has ownership for parser. This instructs SWIG to take
     # ownership of the return value. This allows the value to be automatically
@@ -39,7 +38,6 @@ def test_check_onnx_parser_swig_ownership(parser):
     assert parser.thisown
 
 
-@pytest.mark.skip("Skipped.")
 def test_onnx_parser_get_network_input_binding_info(parser):
     input_binding_info = parser.GetNetworkInputBindingInfo("input")
 
@@ -51,7 +49,6 @@ def test_onnx_parser_get_network_input_binding_info(parser):
     assert tensor.GetQuantizationScale() == 0
 
 
-@pytest.mark.skip("Skipped.")
 def test_onnx_parser_get_network_output_binding_info(parser):
     output_binding_info = parser.GetNetworkOutputBindingInfo("output")
 
@@ -79,7 +76,6 @@ def test_onnx_filenotfound_exception(shared_data_folder):
     assert 'Invalid (null) filename' in str(err.value)
 
 
-@pytest.mark.skip("Skipped.")
 def test_onnx_parser_end_to_end(shared_data_folder):
     parser = ann.IOnnxParser = ann.IOnnxParser()
 

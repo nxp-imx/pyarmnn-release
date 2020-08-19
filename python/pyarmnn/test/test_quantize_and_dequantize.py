@@ -1,4 +1,4 @@
-# Copyright © 2019 Arm Ltd. All rights reserved.
+# Copyright © 2020 Arm Ltd. All rights reserved.
 # SPDX-License-Identifier: MIT
 import pytest
 import numpy as np
@@ -10,9 +10,11 @@ import pyarmnn as ann
 import pyarmnn._generated.pyarmnn as gen_ann
 
 
-@pytest.mark.parametrize('method', ['Quantize_uint8_t',
+@pytest.mark.parametrize('method', ['Quantize_int8_t',
+                                    'Quantize_uint8_t',
                                     'Quantize_int16_t',
                                     'Quantize_int32_t',
+                                    'Dequantize_int8_t',
                                     'Dequantize_uint8_t',
                                     'Dequantize_int16_t',
                                     'Dequantize_int32_t'])
@@ -21,6 +23,7 @@ def test_quantize_exists(method):
 
 
 @pytest.mark.parametrize('dt, min, max', [('uint8', 0, 255),
+                                          ('int8', -128, 127),
                                           ('int16', -32768, 32767),
                                           ('int32', -2147483648, 2147483647)])
 def test_quantize_uint8_output(dt, min, max):
@@ -29,6 +32,7 @@ def test_quantize_uint8_output(dt, min, max):
 
 
 @pytest.mark.parametrize('dt', ['uint8',
+                                'int8',
                                 'int16',
                                 'int32'])
 def test_dequantize_uint8_output(dt):
@@ -38,16 +42,16 @@ def test_dequantize_uint8_output(dt):
 
 def test_quantize_unsupported_dtype():
     with pytest.raises(ValueError) as err:
-        ann.quantize(3.3274056911468506, 0.02620004490017891, 128, 'int8')
+        ann.quantize(3.3274056911468506, 0.02620004490017891, 128, 'uint16')
 
-    assert 'Unexpected target datatype int8 given.' in str(err.value)
+    assert 'Unexpected target datatype uint16 given.' in str(err.value)
 
 
 def test_dequantize_unsupported_dtype():
     with pytest.raises(ValueError) as err:
-        ann.dequantize(3, 0.02620004490017891, 128, 'int8')
+        ann.dequantize(3, 0.02620004490017891, 128, 'uint16')
 
-    assert 'Unexpected value datatype int8 given.' in str(err.value)
+    assert 'Unexpected value datatype uint16 given.' in str(err.value)
 
 
 def test_dequantize_value_range():
@@ -58,16 +62,24 @@ def test_dequantize_value_range():
 
 
 @pytest.mark.parametrize('dt, data', [('uint8', np.uint8(255)),
+                                      ('int8',  np.int8(127)),
                                       ('int16', np.int16(32767)),
                                       ('int32', np.int32(2147483647)),
 
+                                      ('uint8', np.int8(127)),
                                       ('uint8', np.int16(255)),
                                       ('uint8', np.int32(255)),
 
+                                      ('int8', np.uint8(127)),
+                                      ('int8', np.int16(127)),
+                                      ('int8', np.int32(127)),
+
+                                      ('int16', np.int8(127)),
                                       ('int16', np.uint8(255)),
                                       ('int16', np.int32(32767)),
 
                                       ('int32', np.uint8(255)),
+                                      ('int16', np.int8(127)),
                                       ('int32', np.int16(32767))
 
                                       ])

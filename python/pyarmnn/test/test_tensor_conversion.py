@@ -66,7 +66,6 @@ def test_make_output_tensors(get_tensor_info_output):
         assert str(tensor[1].GetInfo()) == str(tensor_info[1])
 
 
-@pytest.mark.skip("Skipped.")
 def test_workload_tensors_to_ndarray(get_tensor_info_output):
     # Check shape and size of output from workload_tensors_to_ndarray matches expected.
     output_binding_info = get_tensor_info_output
