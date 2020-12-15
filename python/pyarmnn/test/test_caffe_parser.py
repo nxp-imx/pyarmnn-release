@@ -122,7 +122,7 @@ def test_caffe_parser_end_to_end(shared_data_folder):
 
     runtime.EnqueueWorkload(net_id, input_tensors, output_tensors)
 
-    output_vectors = ann.workload_tensors_to_ndarray(output_tensors)
+    output_vectors = [ann.workload_tensors_to_ndarray(output_tensors)]
 
     # Load golden output file for result comparison.
     expected_output = np.load(os.path.join(shared_data_folder, 'caffe_parser/golden_output_caffe.npy'))
