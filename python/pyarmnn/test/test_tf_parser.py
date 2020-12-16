@@ -124,7 +124,7 @@ def test_tf_parser_end_to_end(shared_data_folder):
     output_tensors = ann.make_output_tensors(outputs_binding_info)
 
     runtime.EnqueueWorkload(net_id, input_tensors, output_tensors)
-    output_vectors = ann.workload_tensors_to_ndarray(output_tensors)
+    output_vectors = [ann.workload_tensors_to_ndarray(output_tensors)]
 
     # Load golden output file for result comparison.
     golden_output = np.load(os.path.join(shared_data_folder, 'tf_parser/golden_output_tf.npy'))
